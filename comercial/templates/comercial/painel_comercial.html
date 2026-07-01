@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Comercial - AleTech</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 m-0 p-0 select-none overflow-hidden h-screen flex flex-col">
+
+    {% csrf_token %}
+
+    {% include "partials/sidebar.html" %}
+
+    <div class="lg:ml-64 h-screen max-h-screen p-6 flex flex-col transition-all duration-300 overflow-hidden">
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 mt-12 lg:mt-0 gap-4 flex-none">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Gerenciamento de Oportunidades</h1>
+                <p class="text-sm text-gray-500">Olá, {{ request.user.get_full_name|default:request.user.username }}</p>
+            </div>
+            
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg shadow-xs border border-gray-200">
+                    <label for="filtroVendedor" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Vendedor:</label>
+                    <select id="filtroVendedor" class="text-xs bg-transparent border-none text-gray-800 font-semibold focus:outline-none cursor-pointer">
+                        <option value="todos">Todos os Responsáveis</option>
+                    </select>
+                </div>
+                <div class="space-x-2 flex flex-none">
+                    <a href="{% url 'novo_cliente' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 text-sm font-semibold transition-colors">+ Novo Cliente</a>
+                    <a href="{% url 'nova_oportunidade' %}" class="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-black text-sm font-semibold transition-colors">+ Nova Demanda</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 flex-none">
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leads Ativos</p>
+                <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ total_leads }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Propostas em Aberto</p>
+                <p class="text-2xl font-extrabold text-blue-600 mt-1">{{ propostas_abertas }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Em Negociação</p>
+                <p class="text-2xl font-extrabold text-amber-600 mt-1">R$ {{ total_em_negociacao|floatformat:2 }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Faturamento Ganho</p>
+                <p class="text-2xl font-extrabold text-emerald-600 mt-1">R$ {{ total_ganho|floatformat:2 }}</p>
+            </div>
+        </div>
+
+        <div id="kanban-toast" class="hidden fixed bottom-5 right-5 bg-rose-600 text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium z-50 items-center gap-2 transition-all">
+            <span>⚠️</span> <span id="toast-message">Erro ao salvar alteração.</span>
+        </div>
+
+        <div class="flex flex-1 overflow-x-auto gap-4 pb-4 items-stretch min-h-0 w-full scrollbar-thin">
+            
+            <div class="flex flex-col flex-none w-[310px] bg-gray-100/80 border border-gray-200 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-gray-700 border-b border-gray-200 flex justify-between items-center bg-gray-100 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">EM PROSPECÇÃO</span>
+                    <span class="column-count bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ prospeccao|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Prospecção">
+                    {% for op in prospeccao %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-sky-50/50 border border-sky-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-sky-800 border-b border-sky-100 flex justify-between items-center bg-sky-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">EM TESTE</span>
+                    <span class="column-count bg-sky-100 text-sky-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ em_teste|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Em_Teste">
+                    {% for op in em_teste %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-blue-50/50 border border-blue-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-blue-800 border-b border-blue-100 flex justify-between items-center bg-blue-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">QUALIFICAÇÕES</span>
+                    <span class="column-count bg-blue-100 text-blue-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ qualificacao|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Qualificacao">
+                    {% for op in qualificacao %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-purple-50/50 border border-purple-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-purple-800 border-b border-purple-100 flex justify-between items-center bg-purple-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">PROPOSTAS ENVIADAS</span>
+                    <span class="column-count bg-purple-100 text-purple-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ proposta|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Proposta">
+                    {% for op in proposta %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-amber-50/50 border border-amber-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-amber-800 border-b border-amber-100 flex justify-between items-center bg-amber-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">EM NEGOCIAÇÃO</span>
+                    <span class="column-count bg-amber-100 text-amber-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ negociacao|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Negociacao">
+                    {% for op in negociacao %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-emerald-50/50 border border-emerald-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-emerald-800 border-b border-emerald-100 flex justify-between items-center bg-emerald-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">APROVADOS</span>
+                    <span class="column-count bg-emerald-100 text-emerald-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ ganhou|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Fechado_Ganhou">
+                    {% for op in ganhou %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex flex-col flex-none w-[310px] bg-rose-50/50 border border-rose-100 rounded-xl shadow-xs h-full">
+                <div class="p-3 font-bold text-rose-800 border-b border-rose-100 flex justify-between items-center bg-rose-50 rounded-t-xl flex-none">
+                    <span class="text-xs uppercase tracking-wider">❌ Perdido</span>
+                    <span class="column-count bg-rose-100 text-rose-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ perdeu|length }}</span>
+                </div>
+                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Fechado_Perdeu">
+                    {% for op in perdeu %}
+                        {% include "comercial/partials/card_kanban.html" with op=op %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const toast = document.getElementById('kanban-toast');
+        const toastMsg = document.getElementById('toast-message');
+
+        function mostrarErro(mensagem) {
+            toastMsg.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            setTimeout(() => {
+                toast.classList.remove('flex');
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Função de contagem atualizada para considerar apenas elementos visíveis (não ocultos pelo filtro)
+        function atualizarContadoresColunas(colunaOrigem, colunaDestino) {
+            const contarVisiveis = (coluna) => {
+                return Array.from(coluna.children).filter(card => card.style.display !== 'none').length;
+            };
+
+            if (colunaOrigem) {
+                const badgeOrigem = colunaOrigem.parentElement.querySelector('.column-count');
+                if (badgeOrigem) badgeOrigem.textContent = contarVisiveis(colunaOrigem);
+            }
+            if (colunaDestino && colunaOrigem !== colunaDestino) {
+                const badgeDestino = colunaDestino.parentElement.querySelector('.column-count');
+                if (badgeDestino) badgeDestino.textContent = contarVisiveis(colunaDestino);
+            }
+        }
+
+        // --- SISTEMA DINÂMICO DE FILTRAGEM POR VENDEDOR ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtroSelect = document.getElementById('filtroVendedor');
+            const colunas = document.querySelectorAll('.overflow-y-auto[id]');
+            
+            // 1. Mapeia todos os elementos internos para identificar onde o crachá do vendedor está renderizado
+            const obterNomeVendedorDeCard = (card) => {
+                // Procura por blocos de texto que contenham padrões como "COMERCIAL_" ou nomes baseados na imagem
+                const elementosTexto = card.querySelectorAll('span, div, p');
+                for (let elem of elementosTexto) {
+                    const texto = elem.textContent.trim();
+                    if (texto.includes('COMERCIAL_') || (elem.classList.contains('bg-gray-100') && texto.length > 2)) {
+                        return texto;
+                    }
+                }
+                // Fallback caso não ache uma estrutura padrão, lê o texto do rodapé do card
+                return card.textContent.includes('COMERCIAL_') ? 'COMERCIAL_' : null;
+            };
+
+            // 2. Coleta os vendedores únicos presentes nos cards para alimentar o Select
+            const vendedoresUnicos = new Set();
+            colunas.forEach(coluna => {
+                Array.from(coluna.children).forEach(card => {
+                    const nomeVendedor = obterNomeVendedorDeCard(card);
+                    if (nomeVendedor) {
+                        card.setAttribute('data-vendedor-tag', nomeVendedor); // Guarda como metadado no card
+                        vendedoresUnicos.add(nomeVendedor);
+                    }
+                });
+            });
+
+            // 3. Popula o menu Dropdown
+            vendedoresUnicos.forEach(vendedor => {
+                const opt = document.createElement('option');
+                opt.value = vendedor;
+                opt.textContent = vendedor;
+                filtroSelect.appendChild(opt);
+            });
+
+            // 4. Aplica a ação de Filtragem e atualiza as badges numéricas das colunas
+            filtroSelect.addEventListener('change', function() {
+                const vendedorSelecionado = this.value;
+
+                colunas.forEach(coluna => {
+                    Array.from(coluna.children).forEach(card => {
+                        const vCard = card.getAttribute('data-vendedor-tag');
+                        if (vendedorSelecionado === 'todos' || vCard === vendedorSelecionado) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    // Atualiza o contador individual da coluna respectiva
+                    atualizarContadoresColunas(coluna, null);
+                });
+            });
+        });
+
+        document.querySelectorAll('.overflow-y-auto[id]').forEach(column => {
+            new Sortable(column, {
+                group: 'kanban',
+                animation: 180,
+                ghostClass: 'opacity-40',
+                chosenClass: 'border-blue-500',
+                forceFallback: false,
+
+                onStart: function() {
+                    document.body.style.overflow = 'hidden';
+                },
+                
+                onEnd: function (evt) {
+                    document.body.style.overflow = '';
+                    
+                    const itemEl = evt.item;
+                    const oportunidadeId = itemEl.getAttribute('data-id');
+                    const novoEstagio = evt.to.id;
+                    
+                    if (evt.from === evt.to) return;
+                    
+                    atualizarContadoresColunas(evt.from, evt.to);
+                    
+                    fetch("{% url 'atualizar_estagio_kanban' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrftoken
+                        },
+                        body: JSON.stringify({
+                            id: oportunidadeId,
+                            estagio: novoEstagio
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            mostrarErro(data.message || 'Movimentação não autorizada.');
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        mostrarErro('Instabilidade na rede. Sincronizando quadro...');
+                        setTimeout(() => window.location.reload(), 2000);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

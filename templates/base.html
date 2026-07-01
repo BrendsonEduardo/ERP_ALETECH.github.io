@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ERP AleTech{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900 min-h-screen flex flex-col">
+
+    <nav class="bg-gray-900 text-white shadow-md z-50 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-xl font-black tracking-wider text-blue-400">AleTech</span>
+                    <span class="text-xs uppercase bg-gray-800 text-gray-400 px-2 py-0.5 rounded font-mono">ERP</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{% url 'painel_comercial' %}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 rounded-md transition">
+                        💼 Comercial (Kanban)
+                    </a>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs font-bold text-white">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Colaborador</p>
+                        </div>
+                        <a href="{% url 'logout' %}" class="text-xs bg-gray-800 hover:bg-red-900 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
+                            Sair
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm font-medium text-blue-400 hover:text-blue-300">Entrar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 max-w-7xl w-full mx-auto">
+        
+        <aside class="w-64 flex-shrink-0 hidden md:block py-6 pr-4">
+            {% include 'partials/sidebar.html' %}
+        </aside>
+
+        <main class="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+            {% if messages %}
+                <div class="max-w-2xl mx-auto mb-4 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-3 text-sm rounded-lg shadow border {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200{% else %}bg-amber-50 text-amber-800 border-amber-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <footer class="bg-white border-t border-gray-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400 font-medium">
+            &copy; 2026 ERP AleTech. Todos os direitos reservados.
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

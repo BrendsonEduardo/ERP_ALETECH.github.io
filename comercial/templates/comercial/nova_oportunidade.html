@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-8 p-4">
+    <div class="mb-6">
+        <a href="{% url 'painel_comercial' %}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition">
+            &larr; Voltar para o Pipeline
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gray-900 px-6 py-4">
+            <h1 class="text-lg font-bold text-white">Cadastrar Oportunidade no Funil</h1>
+            <p class="text-xs text-gray-400 mt-1">Insira as informações do lead para acompanhamento técnico-comercial.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Título da Negociação *</label>
+                <input type="text" name="titulo" placeholder="Ex: Implantação de Módulo Fiscal ou Licenciamento Anual" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" required>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Cliente Vinculado *</label>
+                    <select name="cliente" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" required>
+                        <option value="" class="text-gray-400">-- Selecione um Cliente --</option>
+                        {% for cliente in clientes %}
+                            <option value="{{ cliente.id }}">{{ cliente.nome_fantasia }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-[11px] text-gray-400 mt-1">Não encontrou? <a href="{% url 'novo_cliente' %}" class="text-blue-600 font-medium hover:underline">Cadastre o cliente primeiro</a>.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Estágio Inicial do Funil</label>
+                    <select name="estagio" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
+                        <option value="Prospecção">Prospecção</option>
+                        <option value="Qualificação">Qualificação</option>
+                        <option value="Proposta">Proposta Enviada</option>
+                        <option value="Negociação">Negociação</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Valor Estimado do Contrato (R$) *</label>
+                    <input type="text" name="valor_estimado_visivel" id="valor_estimado_visivel" placeholder="0,00" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" required>
+                    <input type="hidden" name="valor_estimado" id="valor_estimado">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Previsão de Fechamento *</label>
+                    <input type="date" name="data_fechamento_prevista" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Escopo / Detalhes da Ocorrência Comercial</label>
+                <textarea name="descricao" rows="4" placeholder="Descreva as dores do cliente e as soluções da AleTech levantadas na reunião técnica..." 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm"></textarea>
+            </div>
+
+            <div class="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Proposta Técnica ou Contrato Comercial (PDF)</label>
+                <input type="file" name="contrato_proposta" accept=".pdf" 
+                       class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition">
+                <p class="text-[11px] text-gray-400 mt-1">Opcional. Você também poderá anexar ou alterar este documento mais tarde editando a oportunidade.</p>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-end gap-2">
+                <a href="{% url 'painel_comercial' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow-xs transition">
+                    Inserir no Pipeline
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const inputVisivel = document.getElementById('valor_estimado_visivel');
+    const inputOculto = document.getElementById('valor_estimado');
+
+    // REGRA DE NEGÓCIO: Impede a seleção de datas retroativas no calendário do navegador
+    const inputData = document.querySelector('input[type="date"]');
+    if (inputData) {
+        const hoje = new Date().toISOString().split('T')[0];
+        inputData.min = hoje;
+    }
+
+    // Centraliza a conversão e tratamento numérico
+    function formatarParaDecimal(stringVal) {
+        let value = stringVal.replace(/\D/g, "");
+        if (!value) return "0.00";
+        return (Number(value) / 100).toFixed(2);
+    }
+
+    // Máscara em tempo real para moeda padrão BRL
+    inputVisivel.addEventListener('input', (e) => {
+        if (e.target.value === "") {
+            inputVisivel.value = "";
+            inputOculto.value = "";
+            return;
+        }
+
+        let valorDecimal = formatarParaDecimal(e.target.value);
+        
+        inputVisivel.value = Number(valorDecimal).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        inputOculto.value = valorDecimal;
+    });
+
+    // BLINDAGEM NO SUBMIT: Previne falhas por cliques assíncronos rápidos e envia o dado sanitizado
+    document.querySelector('form').addEventListener('submit', () => {
+        if (inputVisivel.value) {
+            let limpo = inputVisivel.value.replace(/\./g, "").replace(",", ".");
+            let convertido = parseFloat(limpo);
+            inputOculto.value = !isNaN(convertido) ? convertido.toFixed(2) : "0.00";
+        } else {
+            inputOculto.value = "0.00";
+        }
+    });
+</script>
+{% endblock %}

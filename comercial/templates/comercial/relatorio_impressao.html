@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatorio_AleTech_{{ request.GET.tipo_relatorio|default:"Geral" }}_{{ now|date:"Ymd" }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { background-color: #ffffff; color: #000000; padding: 0; }
+            .no-print { display: none !important; }
+            .print-border { border: 1px solid #d1d5db !important; border-radius: 0 !important; box-shadow: none !important; }
+            tr { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8 min-h-screen">
+
+    <div class="no-print max-w-5xl mx-auto mb-6 flex justify-end">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2">
+            <span>🖨️</span> Reabrir Janela de Impressão
+        </button>
+    </div>
+
+    <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-200 print-border">
+        
+        <div class="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-black text-gray-900 tracking-tight">ALETECH ERP</h1>
+                <p class="text-xs uppercase font-bold tracking-wider text-gray-500 mt-1">
+                    {% if request.GET.tipo_relatorio == 'geral' or not request.GET.tipo_relatorio %}
+                        📈 Relatório Oficial de Visão Geral Comercial
+                    {% elif request.GET.tipo_relatorio == 'vendedores' %}
+                        💼 Relatório de Desempenho por Vendedor
+                    {% elif request.GET.tipo_relatorio == 'faturamento' %}
+                        💰 Relatório de Faturamento e Conversões
+                    {% elif request.GET.tipo_relatorio == 'clientes' %}
+                        👥 Relatório Oficial de Controle de Clientes
+                    {% endif %}
+                </p>
+            </div>
+            <div class="text-right text-xs text-gray-500">
+                <p><strong>Emitido em:</strong> {% now "d/m/Y H:i" %}</p>
+                <p><strong>Gerado por:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 flex justify-between text-sm text-gray-700">
+            <div>
+                <strong>Período de Análise:</strong> 
+                {% if data_inicio %}{{ data_inicio }}{% else %}Início{% endif %} até 
+                {% if data_fim %}{{ data_fim }}{% else %}Hoje{% endif %}
+            </div>
+            <div class="text-xs text-gray-400 self-center">
+                Filtro: {{ request.GET.tipo_relatorio|default:"geral"|upper }}
+            </div>
+        </div>
+
+        {% if request.GET.tipo_relatorio == 'geral' or request.GET.tipo_relatorio == 'faturamento' or not request.GET.tipo_relatorio %}
+            
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="border p-5 rounded-xl bg-gray-50/50">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Novos Clientes no Período</p>
+                    <p class="text-3xl font-black text-gray-900 mt-1">{{ total_clientes|default:"0" }}</p>
+                </div>
+                <div class="border p-5 rounded-xl bg-gray-50/50">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Propostas em Aberto no Funil</p>
+                    <p class="text-3xl font-black text-gray-900 mt-1">{{ propostas_abertas|default:"0" }}</p>
+                </div>
+                <div class="border p-5 rounded-xl bg-gray-50/50">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Conversões Concluídas (Ganhas)</p>
+                    <p class="text-3xl font-black text-gray-900 mt-1">{{ propostas_ganhas|default:"0" }}</p>
+                </div>
+                <div class="border p-5 rounded-xl bg-gray-50/50 border-emerald-200 bg-emerald-50/10">
+                    <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Valor Total Convertido (Receita)</p>
+                    <p class="text-3xl font-black text-emerald-600 mt-1">R$ {{ receita_total|default:"0,00" }}</p>
+                </div>
+            </div>
+
+            <div class="p-4 border border-dashed border-gray-300 rounded-xl text-center text-xs text-gray-500 italic bg-gray-50/30">
+                Os dados analíticos acima sumarizam as operações do departamento comercial dentro do escopo temporal selecionado.
+            </div>
+
+        {% elif request.GET.tipo_relatorio == 'vendedores' %}
+            
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b-2 border-gray-400 bg-gray-100 text-gray-700 font-bold uppercase">
+                        <th class="py-3 px-3">Profissional Responsável</th>
+                        <th class="py-3 px-3 text-center">Contratos Fechados</th>
+                        <th class="py-3 px-3 text-right">Volume de Receita Gerado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr class="text-gray-800">
+                        <td class="py-3 px-3 font-bold">{{ request.user.get_full_name|default:request.user.username }}</td>
+                        <td class="py-3 px-3 text-center">{{ propostas_ganhas|default:"0" }}</td>
+                        <td class="py-3 px-3 text-right font-semibold text-emerald-600">R$ {{ receita_total|default:"0,00" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        {% elif request.GET.tipo_relatorio == 'clientes' %}
+            
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b-2 border-gray-400 bg-gray-100 text-gray-700 font-bold uppercase">
+                        <th class="py-3 px-3">Nome Fantasia</th>
+                        <th class="py-3 px-3">Razão Social</th>
+                        <th class="py-3 px-3">CNPJ / CPF</th>
+                        <th class="py-3 px-3">Tipo</th>
+                        <th class="py-3 px-3">E-mail de Contato</th>
+                        <th class="py-3 px-3">Telefone</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for cliente in clientes %}
+                    <tr class="text-gray-800">
+                        <td class="py-3 px-3 font-bold">{{ cliente.nome_fantasia }}</td>
+                        <td class="py-3 px-3 text-gray-600">{{ cliente.razao_social }}</td>
+                        <td class="py-3 px-3 font-mono">{{ cliente.cnpj_cpf }}</td>
+                        <td class="py-3 px-3 font-semibold">{{ cliente.tipo }}</td>
+                        <td class="py-3 px-3 break-all">{{ cliente.email }}</td>
+                        <td class="py-3 px-3">{{ cliente.telefone|default:"---" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-400 italic">
+                            Nenhum cliente disponível na base de dados para o período selecionado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% endif %}
+
+        <div class="mt-12 pt-4 border-t border-gray-200 text-center text-[10px] text-gray-400">
+            <p>Este relatório foi gerado automaticamente pelo módulo comercial do ERP AleTech. Documento para uso estritamente interno.</p>
+        </div>
+
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.print();
+            }, 600);
+        });
+    </script>
+
+</body>
+</html>

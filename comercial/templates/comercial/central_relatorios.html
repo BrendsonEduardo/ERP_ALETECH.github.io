@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8 text-gray-200 min-h-screen">
+    
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 border-b border-gray-800 pb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-wide">📈 Central de Relatórios</h1>
+            <p class="text-sm text-gray-500 mt-1">Consulte os indicadores comerciais e emita relatórios customizados.</p>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+        <form method="GET" action="{% url 'central_relatorios' %}" class="flex flex-col lg:flex-row items-end gap-4">
+            
+            <div class="w-full lg:w-1/4">
+                <label for="tipo_relatorio" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo de Relatório</label>
+                <select id="tipo_relatorio" name="tipo_relatorio" 
+                        class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                    <option value="geral" {% if request.GET.tipo_relatorio == 'geral' or not request.GET.tipo_relatorio %}selected{% endif %}>📊 Visão Geral Comercial</option>
+                    <option value="vendedores" {% if request.GET.tipo_relatorio == 'vendedores' %}selected{% endif %}>💼 Desempenho por Vendedor</option>
+                    <option value="clientes" {% if request.GET.tipo_relatorio == 'clientes' %}selected{% endif %}>👥 Novos Clientes Cadastrados</option>
+                    <option value="faturamento" {% if request.GET.tipo_relatorio == 'faturamento' %}selected{% endif %}>💰 Faturamento e Conversões</option>
+                </select>
+            </div>
+
+            <div class="w-full md:w-1/2 lg:w-1/4">
+                <label for="data_inicio" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data Inicial</label>
+                <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio }}" 
+                       class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+            
+            <div class="w-full md:w-1/2 lg:w-1/4">
+                <label for="data_fim" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data Final</label>
+                <input type="date" id="data_fim" name="data_fim" value="{{ data_fim }}" 
+                       class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+
+            <div class="w-full lg:w-1/4 flex gap-2">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 shadow-md cursor-pointer">
+                    <span>🔍</span> <span>Filtrar</span>
+                </button>
+                
+                <a href="#" 
+                   id="btn-imprimir"
+                   target="_blank" 
+                   class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 shadow-md text-center cursor-pointer">
+                    <span>🖨️</span> <span>Imprimir</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Novos Clientes</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_clientes|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-1">Cadastrados no período</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
+            <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Propostas em Aberto</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ propostas_abertas|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-1">Negociações ativas no funil</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
+            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Conversões (Ganhas)</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ propostas_ganhas|default:"0" }}</p>
+            <p class="text-xs text-gray-500 mt-1">Contratos fechados</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
+            <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Valor Convertido</p>
+            <p class="text-3xl font-bold text-emerald-600 mt-2">R$ {{ receita_total|default:"0,00" }}</p>
+            <p class="text-xs text-gray-500 mt-1">Faturamento gerado no período</p>
+        </div>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 flex items-start space-x-3">
+        <span class="text-xl text-blue-500 mt-0.5">ℹ️</span>
+        <div>
+            <h4 class="text-sm font-semibold text-blue-800">Dica do Sistema</h4>
+            <p class="text-xs text-blue-950 mt-0.5">
+                Os dados acima refletem estritamente o intervalo selecionado. Para gerar um arquivo impresso em PDF limpo, formatado sem os menus do sistema e ideal para reuniões, clique no botão <strong class="text-emerald-600">"Imprimir"</strong>.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const selectTipo = document.getElementById('tipo_relatorio');
+    const inputInicio = document.getElementById('data_inicio');
+    const inputFim = document.getElementById('data_fim');
+    const btnImprimir = document.getElementById('btn-imprimir');
+
+    function atualizarLinkImpressao() {
+        const tipo = selectTipo.value;
+        const inicio = inputInicio.value;
+        const fim = inputFim.value;
+        
+        // Atualiza a URL do link com os valores exatos da tela em tempo real
+        btnImprimir.href = `{% url 'exportar_relatorio_clientes' %}?tipo_relatorio=${tipo}&data_inicio=${inicio}&data_fim=${fim}`;
+    }
+
+    // Escuta qualquer mudança nos inputs do formulário
+    selectTipo.addEventListener('change', atualizarLinkImpressao);
+    inputInicio.addEventListener('change', atualizarLinkImpressao);
+    inputFim.addEventListener('change', atualizarLinkImpressao);
+
+    // Executa uma vez ao carregar a página para manter o estado atualizado
+    window.addEventListener('DOMContentLoaded', atualizarLinkImpressao);
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chamado #{{ chamado.id }} - ERP AleTech</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="max-w-4xl mx-auto py-10 px-4">
+        <div class="flex justify-between items-center mb-6">
+            <a href="{% url 'painel_helpdesk' %}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition">
+                ← Voltar para o Painel
+            </a>
+            <span class="text-sm text-gray-500">ID do Chamado: #{{ chamado.id }}</span>
+        </div>
+
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-white">Ficha de Atendimento</h1>
+                
+                <div>
+                    {% if chamado.status == 'Aberto' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">🔴 Aberto</span>
+                    {% elif chamado.status == 'Em Atendimento' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">🟡 Em Atendimento</span>
+                    {% elif chamado.status == 'Aguardando Usuário' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-sky-100 text-sky-800">🔵 Aguardando Usuário</span>
+                    {% elif chamado.status == 'Aguardando Terceiros' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">🟣 Aguardando Terceiros</span>
+                    {% elif chamado.status == 'Resolvido' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">🟢 Resolvido</span>
+                    {% elif chamado.status == 'Encerrado' %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-300 text-gray-800">🔒 Encerrado</span>
+                    {% else %}
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">{{ chamado.status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-gray-200">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Empresa</label>
+                    <p class="mt-1 text-base font-semibold text-gray-900">{{ chamado.empresa }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Solicitante / Contato</label>
+                    <p class="mt-1 text-base font-semibold text-gray-900">{{ chamado.solicitante }} <span class="text-sm font-normal text-gray-500">({{ chamado.contato|default:"Não informado" }})</span></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Data de Abertura</label>
+                    <p class="mt-1 text-base text-gray-700">{{ chamado.data_hora|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Forma de Atendimento</label>
+                    <p class="mt-1 text-base text-gray-700">{{ chamado.forma_atendimento }}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Equipamento / Ativo</label>
+                    <p class="mt-1 text-base text-gray-700">{{ chamado.equipamento }}</p>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Grau de Prioridade</label>
+                    <div class="mt-1">
+                        {% if chamado.prioridade == 'Alta' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">Alta Urgência</span>
+                        {% elif chamado.prioridade == 'Média' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">Média</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">Baixa</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Técnico Responsável</label>
+                    <p class="mt-1 text-base text-gray-700 font-medium text-blue-600">
+                        {{ chamado.nome_tecnico|default:"Não atribuído" }}
+                        
+                        {% if chamado.tecnico and chamado.tecnico.cargo %}
+                            <span class="ml-1.5 px-2 py-0.5 text-xs font-normal rounded bg-gray-100 text-gray-600 border border-gray-200">
+                                {{ chamado.tecnico.get_cargo_display }}
+                            </span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-6 border-b border-gray-200 bg-gray-50">
+                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Problema Apresentado</label>
+                <div class="text-base text-gray-800 whitespace-pre-line bg-white p-4 rounded border border-gray-200 shadow-sm">
+                    {{ chamado.problema }}
+                </div>
+            </div>
+
+            <div class="p-6">
+                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Último Comentário / Ações Realizadas</label>
+                {% if chamado.ultimo_comentario %}
+                    <div class="text-base text-gray-800 whitespace-pre-line bg-blue-50 p-4 rounded border border-blue-200">
+                        {{ chamado.ultimo_comentario }}
+                    </div>
+                {% else %}
+                    <p class="text-sm italic text-gray-500">Nenhum registro de ação técnica ou justificativa inserido até o momento.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

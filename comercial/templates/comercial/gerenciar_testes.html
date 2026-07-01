@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+    
+    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">🔬 Controle de Equipamentos em Teste</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Oportunidade: <span class="font-semibold text-gray-700">{{ op.titulo }}</span></p>
+        </div>
+        <a href="{% url 'detalhe_proposta' op.id %}" class="text-xs font-semibold text-gray-500 hover:text-gray-700 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 transition">&larr; Voltar</a>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Setor / Projeto Destinado *</label>
+                <input type="text" name="setor_projeto" value="{{ teste.setor_projeto|default:'' }}" required placeholder="Ex: Laboratório / TI"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-800">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Data de Envio *</label>
+                <input type="date" name="data_envio" value="{{ teste.data_envio|date:'Y-m-d'|default:'' }}" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-800">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Dias de Duração *</label>
+                <input type="number" name="dias_duracao" value="{{ teste.dias_duracao|default:7 }}" min="1" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-800 font-semibold">
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Lista de Ativos Enviados</h3>
+                <button type="button" id="btn-adicionar" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs transition cursor-pointer">
+                    + Adicionar Equipamento
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-gray-400 uppercase tracking-wider font-bold text-[10px]">
+                            <th class="pb-2 pr-2 w-1/4">Marca *</th>
+                            <th class="pb-2 pr-2 w-1/4">Modelo *</th>
+                            <th class="pb-2 pr-2 w-1/3">Nº de Série *</th>
+                            <th class="pb-2 pr-2 w-16 text-center">Qtd</th>
+                            <th class="pb-2 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="container-equipamentos" class="divide-y divide-gray-100">
+                        {% if teste and teste.equipamentos_teste.all %}
+                            {% for eq in teste.equipamentos_teste.all %}
+                            <tr class="item-equipamento row-animada">
+                                <td class="py-2 pr-2"><input type="text" name="marca[]" value="{{ eq.marca }}" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="text" name="modelo[]" value="{{ eq.modelo }}" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="text" name="numero_serie[]" value="{{ eq.numero_serie }}" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="number" name="quantidade[]" value="{{ eq.quantidade }}" min="1" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs text-center font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 text-right">
+                                    <button type="button" class="btn-remover font-bold px-2 text-rose-600 hover:text-rose-800 cursor-pointer">✕</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="item-equipamento">
+                                <td class="py-2 pr-2"><input type="text" name="marca[]" required placeholder="Ex: Cisco" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="text" name="modelo[]" required placeholder="Ex: Catalyst 2960" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="text" name="numero_serie[]" required placeholder="S/N Único" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 pr-2"><input type="number" name="quantidade[]" value="1" min="1" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs text-center font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+                                <td class="py-2 text-right"><button type="button" class="btn-remover text-gray-300 cursor-not-allowed font-bold px-2" disabled>✕</button></td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Notas Gerais / Escopo de Homologação</label>
+            <textarea name="observacoes" rows="3" placeholder="Restrições, condições físicas ou acordos específicos do teste..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-800">{{ teste.observacoes|default:'' }}</textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+            <a href="{% url 'detalhe_proposta' op.id %}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition shadow-sm">
+                Cancelar
+            </a>
+            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow-xs">
+                Salvar Histórico de Teste
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const container = document.getElementById('container-equipamentos');
+    const btnAdicionar = document.getElementById('btn-adicionar');
+
+    function gerenciarEstiloBotoesRemover() {
+        const linhas = container.querySelectorAll('.item-equipamento');
+        const botoes = container.querySelectorAll('.btn-remover');
+        
+        if (linhas.length === 1) {
+            botoes[0].setAttribute('disabled', 'true');
+            botoes[0].className = 'btn-remover text-gray-300 cursor-not-allowed font-bold px-2';
+        } else {
+            botoes.forEach(botao => {
+                botao.removeAttribute('disabled');
+                botao.className = 'btn-remover text-rose-600 hover:text-rose-800 font-bold px-2 cursor-pointer';
+            });
+        }
+    }
+
+    // Inicializa os botões no carregamento do template (útil para o modo de edição)
+    window.addEventListener('DOMContentLoaded', () => {
+        gerenciarEstiloBotoesRemover();
+    });
+
+    // Escuta cliques no container para delegar a remoção de linhas
+    container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-remover')) {
+            const linhas = container.querySelectorAll('.item-equipamento');
+            if (linhas.length > 1) {
+                e.target.closest('tr').remove();
+                gerenciarEstiloBotoesRemover();
+            }
+        }
+    });
+
+    // Adiciona uma nova linha clonando a estrutura padrão limpa
+    btnAdicionar.addEventListener('click', () => {
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'item-equipamento';
+        novaLinha.innerHTML = `
+            <td class="py-2 pr-2"><input type="text" name="marca[]" required placeholder="Marca" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+            <td class="py-2 pr-2"><input type="text" name="modelo[]" required placeholder="Modelo" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+            <td class="py-2 pr-2"><input type="text" name="numero_serie[]" required placeholder="S/N" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+            <td class="py-2 pr-2"><input type="number" name="quantidade[]" value="1" min="1" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs text-center font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"></td>
+            <td class="py-2 text-right"><button type="button" class="btn-remover text-rose-600 hover:text-rose-800 font-bold px-2 cursor-pointer">✕</button></td>
+        `;
+        container.appendChild(novaLinha);
+        gerenciarEstiloBotoesRemover();
+    });
+</script>
+{% endblock %}

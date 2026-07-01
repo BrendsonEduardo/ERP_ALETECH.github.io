@@ -1,0 +1,35 @@
+<div class="bg-white p-3 rounded shadow-sm border border-gray-200 mb-2 cursor-grab active:cursor-grabbing hover:border-blue-400 hover:shadow transition-all" data-id="{{ op.id }}">
+    
+    <div class="flex justify-between items-start mb-1 gap-2">
+        <h4 class="text-sm font-bold text-gray-900 leading-tight truncate w-full" title="{{ op.cliente.nome_fantasia }}">
+            {{ op.cliente.nome_fantasia }}
+        </h4>
+        
+        <a href="{% url 'detalhe_proposta' op.id %}" class="text-gray-400 hover:text-blue-600 text-xs transition" title="Visualizar Detalhes">
+            👁️
+        </a>
+    </div>
+    
+    <p class="text-xs text-gray-600 font-medium mb-2 truncate" title="{{ op.titulo }}">{{ op.titulo }}</p>
+
+    {% if op.teste %}
+        <a href="{% url 'gerenciar_teste' op.id %}" class="block mt-1 mb-2">
+            <div class="flex items-center gap-1 text-[9px] font-extrabold text-sky-800 bg-sky-50 border border-sky-200/60 px-1.5 py-0.5 rounded w-max uppercase tracking-wider hover:bg-sky-100 transition shadow-xs animate-pulse" title="Clique para gerenciar os equipamentos em teste">
+                🔬 Em Teste ({{ op.teste.dias_duracao }}d)
+            </div>
+        </a>
+    {% endif %}
+
+    <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100 text-[11px] text-gray-400">
+        <div class="flex items-center space-x-2">
+            <span class="font-bold text-gray-800">R$ {{ op.valor_estimado|floatformat:2 }}</span>
+            <a href="{% url 'editar_proposta' op.id %}" class="text-gray-400 hover:text-amber-600 transition" title="Editar Oportunidade">
+                ✏️
+            </a>
+        </div>
+        
+        <span class="bg-gray-100 text-gray-500 font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider max-w-[110px] truncate" title="Vendedor responsável: {{ op.vendedor.username|default:'Não atribuído' }}">
+            👤 {{ op.vendedor.username|default:"Sem Dono" }}
+        </span>
+    </div>
+</div>

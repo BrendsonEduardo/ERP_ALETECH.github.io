@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ERP AleTech (Edição Copa do Mundo)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* TEMA COPA: Fundo claro com um sutil degradê nos tons da seleção */
+        body { 
+            background: linear-gradient(135deg, #f3f4f6 0%, #e8f5e9 100%); 
+            color: #1f2937; 
+            min-height: 100vh;
+        }
+        
+        /* TEMA COPA: Card branco com uma borda superior verde e amarela */
+        .card-login { 
+            max-width: 400px; 
+            width: 100%; 
+            background-color: #ffffff; 
+            border: none !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Detalhe da bandeira no topo do card */
+        .card-login::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #009c3b 40%, #ffdf00 40%, #ffdf00 60%, #002776 60%);
+        }
+
+        .logo-login { max-width: 200px; height: auto; }
+        
+        /* Inputs com foco na cor Verde Brasil */
+        .form-control { background-color: #ffffff; border-color: #cbd5e1; color: #1f2937; }
+        .form-control:focus { background-color: #ffffff; border-color: #009c3b; color: #1f2937; box-shadow: 0 0 0 0.25rem rgba(0, 156, 59, 0.15); }
+        .form-control::placeholder { color: #94a3b8; }
+        
+        /* TEMA COPA: Botão Amarelo Canarinho com texto Azul focado na legibilidade */
+        .btn-copa { 
+            background-color: #ffdf00; 
+            color: #002776; 
+            border: 2px solid #ffdf00;
+            font-weight: 800;
+        }
+        .btn-copa:hover { 
+            background-color: #e6c800; 
+            color: #001a50;
+            border-color: #e6c800;
+        }
+        
+        .text-custom-muted { color: #475569 !important; font-weight: 500; }
+        .text-verde-brasil { color: #009c3b; font-weight: 700; }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center">
+
+    <div class="card card-login shadow-xl rounded-4 p-4">
+        <div class="text-center mb-4 mt-2">
+            <img src="{% static 'helpdesk/aletechlgo.webp' %}" alt="ALETECH" class="logo-login img-fluid mb-2">
+            <div>
+                <span class="text-custom-muted small">🏆 Rumo ao Hexa no <span class="text-verde-brasil">ERP AleTech</span></span>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger bg-danger-subtle text-danger border-0 p-2 small text-center" role="alert">
+                    ⚠️ {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" class="m-0 p-0">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_username" class="form-label small fw-bold text-secondary">Usuário</label>
+                <input type="text" name="username" id="id_username" class="form-control" placeholder="Seu usuário" required>
+            </div>
+            <div class="mb-4">
+                <label for="id_password" class="form-label small fw-bold text-secondary">Senha</label>
+                <input type="password" name="password" id="id_password" class="form-control" placeholder="Sua senha" required>
+            </div>
+            <button type="submit" class="btn btn-copa w-100 py-2 transition-all">Entrar no Sistema 🇧🇷</button>
+        </form>
+    </div>
+
+</body>
+</html>

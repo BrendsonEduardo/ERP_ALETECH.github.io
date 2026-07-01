@@ -1,0 +1,13 @@
+# Chaves e Credenciais
+credenciais.json
+
+# Banco de dados local
+db.sqlite3
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.pyc
+
+# Arquivos de log e mídia local
+log_sincronizacao.txt
+media/

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Comercial - AleTech ERP{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex">
+
+    <!-- Menu Lateral (Sidebar) -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col min-h-screen border-r border-slate-800 shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <span class="text-lg font-bold tracking-wider text-white">
+                ALE<span class="text-blue-500">TECH</span> <span class="text-xs text-slate-400 font-normal">COMER</span>
+            </span>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-2">Navegação</p>
+            
+            <a href="{% url 'painel_comercial' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'painel_comercial' %}bg-blue-600 text-white{% else %}hover:bg-slate-800 hover:text-white{% endif %}">
+                <span>📋</span>
+                <span>Kanban de Vendas</span>
+            </a>
+
+            <a href="{% url 'comercial_dashboard' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'comercial_dashboard' %}bg-blue-600 text-white{% else %}hover:bg-slate-800 hover:text-white{% endif %}">
+                <span>📊</span>
+                <span>Dashboard Indicadores</span>
+            </a>
+
+            <a href="{% url 'comercial_clientes_lista' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'comercial_clientes_lista' %}bg-blue-600 text-white{% else %}hover:bg-slate-800 hover:text-white{% endif %}">
+                <span>👥</span>
+                <span>Lista de Clientes</span>
+            </a>
+
+            <!-- NOVO: Link Dedicado para a Central de Relatórios -->
+            <a href="{% url 'central_relatorios' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'central_relatorios' %}bg-blue-600 text-white{% else %}hover:bg-slate-800 hover:text-white{% endif %}">
+                <span>📈</span>
+                <span>Central de Relatórios</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Área de Conteúdo Principal -->
+    <main class="flex-1 min-h-screen bg-gray-950 overflow-y-auto">
+        {% block comercial_content %}
+        <!-- O conteúdo das páginas filhas entrará aqui dinamicamente -->
+        {% endblock %}
+    </main>
+
+</body>
+</html>

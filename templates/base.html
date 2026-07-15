@@ -1,72 +1,247 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ERP AleTech{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        :root {
+            --nu-purple: #8A05BE;
+            --nu-purple-dark: #5B0080;
+            --nu-purple-glow: rgba(138, 5, 190, 0.25);
+            --surface-0: #09090B;
+            --surface-1: #111117;
+            --surface-2: #18181F;
+            --surface-3: #1E1E28;
+            --border: rgba(255,255,255,0.07);
+        }
+
+        * { font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--surface-0);
+            color: #E4E4F0;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(138,5,190,0.6); }
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        /* Stat card com glow no hover */
+        .stat-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.25s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(138,5,190,0.35);
+            box-shadow: 0 0 24px var(--nu-purple-glow);
+            transform: translateY(-1px);
+        }
+
+        /* Botão primário */
+        .btn-nu {
+            background: linear-gradient(135deg, #8A05BE 0%, #6B03A0 100%);
+            color: white;
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 4px 14px rgba(138,5,190,0.3);
+        }
+        .btn-nu:hover {
+            background: linear-gradient(135deg, #9B06D3 0%, #7A04B5 100%);
+            box-shadow: 0 6px 20px rgba(138,5,190,0.45);
+            transform: translateY(-1px);
+        }
+
+        /* Botão secundário */
+        .btn-nu-outline {
+            background: transparent;
+            color: #C084F5;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 13px;
+            border: 1px solid rgba(138,5,190,0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-nu-outline:hover {
+            background: rgba(138,5,190,0.1);
+            border-color: rgba(138,5,190,0.6);
+            color: #D8A8FF;
+        }
+
+        /* Botão destrutivo */
+        .btn-nu-danger {
+            background: transparent;
+            color: #F472B6;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 13px;
+            border: 1px solid rgba(244,114,182,0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-nu-danger:hover {
+            background: rgba(244,114,182,0.1);
+            border-color: rgba(244,114,182,0.5);
+        }
+
+        /* Input */
+        .nu-input {
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #E4E4F0;
+            padding: 10px 14px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .nu-input:focus {
+            outline: none;
+            border-color: rgba(138,5,190,0.6);
+            box-shadow: 0 0 0 3px var(--nu-purple-glow);
+        }
+        .nu-input::placeholder { color: #52525B; }
+
+        /* Label */
+        .nu-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #71717A;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* Badge */
+        .badge-nu {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .badge-success { background: rgba(16,185,129,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.2); }
+        .badge-danger  { background: rgba(244,114,182,0.12); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); }
+        .badge-warning { background: rgba(251,191,36,0.12);  color: #FCD34D; border: 1px solid rgba(252,211,77,0.2); }
+        .badge-info    { background: rgba(96,165,250,0.12);  color: #60A5FA; border: 1px solid rgba(96,165,250,0.2); }
+        .badge-purple  { background: rgba(138,5,190,0.15);   color: #C084F5; border: 1px solid rgba(192,132,245,0.2); }
+        .badge-neutral { background: rgba(255,255,255,0.06); color: #A1A1AA; border: 1px solid rgba(255,255,255,0.08); }
+
+        /* Table */
+        .nu-table thead tr { border-bottom: 1px solid var(--border); }
+        .nu-table thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; padding: 12px 16px; }
+        .nu-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s ease; }
+        .nu-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+        .nu-table tbody td { padding: 14px 16px; font-size: 13px; color: #D4D4D8; }
+        .nu-table tbody tr:last-child { border-bottom: none; }
+
+        /* Progress bar */
+        .nu-progress-track { background: rgba(255,255,255,0.06); border-radius: 99px; height: 6px; overflow: hidden; }
+        .nu-progress-bar { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Page header */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .page-title { font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; }
+        .page-subtitle { font-size: 13px; color: #71717A; margin-top: 3px; }
+
+        /* Alert messages */
+        .nu-alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nu-alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(52,211,153,0.2); color: #34D399; }
+        .nu-alert-error   { background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.2); color: #F472B6; }
+        .nu-alert-info    { background: rgba(138,5,190,0.1);   border: 1px solid rgba(192,132,245,0.2); color: #C084F5; }
+
+        /* Fade-in animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeInUp 0.3s ease forwards; }
+
+        /* Section separator */
+        .nu-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900 min-h-screen flex flex-col">
 
-    <nav class="bg-gray-900 text-white shadow-md z-50 sticky top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <span class="text-xl font-black tracking-wider text-blue-400">AleTech</span>
-                    <span class="text-xs uppercase bg-gray-800 text-gray-400 px-2 py-0.5 rounded font-mono">ERP</span>
-                </div>
+<body class="min-h-screen flex">
 
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="{% url 'painel_comercial' %}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 rounded-md transition">
-                        💼 Comercial (Kanban)
-                    </a>
-                </div>
+    {% include 'partials/sidebar.html' %}
 
-                <div class="flex items-center space-x-4">
-                    {% if user.is_authenticated %}
-                        <div class="text-right hidden sm:block">
-                            <p class="text-xs font-bold text-white">{{ user.get_full_name|default:user.username }}</p>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Colaborador</p>
-                        </div>
-                        <a href="{% url 'logout' %}" class="text-xs bg-gray-800 hover:bg-red-900 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition font-medium">
-                            Sair
-                        </a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="text-sm font-medium text-blue-400 hover:text-blue-300">Entrar</a>
-                    {% endif %}
-                </div>
+    <div id="main-content" class="flex-1 flex flex-col min-h-screen transition-all duration-300"
+        style="margin-left: 256px;">
+
+        {% if messages %}
+        <div class="px-6 pt-5 space-y-2 fade-in">
+            {% for message in messages %}
+            <div
+                class="nu-alert {% if message.tags == 'success' %}nu-alert-success{% elif message.tags == 'error' %}nu-alert-error{% else %}nu-alert-info{% endif %}">
+                <span>{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}→{% endif %}</span>
+                <span>{{ message }}</span>
             </div>
+            {% endfor %}
         </div>
-    </nav>
+        {% endif %}
 
-    <div class="flex flex-1 max-w-7xl w-full mx-auto">
-        
-        <aside class="w-64 flex-shrink-0 hidden md:block py-6 pr-4">
-            {% include 'partials/sidebar.html' %}
-        </aside>
-
-        <main class="flex-1 py-6 px-4 sm:px-6 lg:px-8">
-            {% if messages %}
-                <div class="max-w-2xl mx-auto mb-4 space-y-2">
-                    {% for message in messages %}
-                        <div class="p-3 text-sm rounded-lg shadow border {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border-emerald-200{% else %}bg-amber-50 text-amber-800 border-amber-200{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% block content %}
-            {% endblock %}
+        <main class="flex-1 p-6 lg:p-8 fade-in">
+            {% block content %}{% endblock %}
         </main>
+
+        <footer class="px-8 py-4 border-t text-xs font-medium" style="border-color: var(--border); color: #3F3F46;">
+            © 2026 ERP AleTech — Todos os direitos reservados
+        </footer>
     </div>
 
-    <footer class="bg-white border-t border-gray-200 py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400 font-medium">
-            &copy; 2026 ERP AleTech. Todos os direitos reservados.
-        </div>
-    </footer>
-
     {% block extra_js %}{% endblock %}
+
+    <script>
+        // Sidebar toggle para mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            const main = document.getElementById('main-content');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+    </script>
 </body>
+
 </html>

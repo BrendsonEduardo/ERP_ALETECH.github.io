@@ -1,120 +1,286 @@
-<button id="toggle-sidebar-btn" class="fixed top-4 left-4 z-50 bg-gray-900 text-white p-2 rounded shadow-md lg:hidden hover:bg-gray-800 transition-colors">
-    ☰
-</button>
+<!-- Sidebar Nubank-inspired -->
+<aside id="app-sidebar"
+    class="fixed top-0 left-0 z-50 h-screen w-64 flex flex-col transition-transform duration-300 ease-in-out"
+    style="background: #0F0027; border-right: 1px solid rgba(138,5,190,0.15);">
 
-<aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-950 text-gray-200 border-r border-gray-800 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
-    
-    <div>
-        <div class="h-16 flex items-center px-6 border-b border-gray-900 bg-gray-900/50">
-            <span class="text-xl font-bold tracking-wider text-white">ALE<span class="text-blue-500">TECH</span> <span class="text-xs text-gray-400 font-normal">ERP</span></span>
-        </div>
-
-        <div class="p-4 border-b border-gray-900 bg-gray-900/20 flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm tracking-wide shadow-inner">
-                {{ request.user.first_name|slice:":2"|upper|default:"US" }}
+    <!-- Logo -->
+    <div class="h-16 flex items-center px-6" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                style="background: linear-gradient(135deg, #8A05BE, #5B0080);">
+                <span class="text-white text-xs font-black">A</span>
             </div>
-            <div class="overflow-hidden">
-                <p class="text-sm font-semibold text-white truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
-                <p class="text-xs text-gray-400 truncate font-medium">{{ request.user.get_cargo_display|default:"Colaborador" }}</p>
+            <div>
+                <span class="text-white font-black text-sm tracking-tight">ALE<span
+                        style="color: #C084F5;">TECH</span></span>
+                <span class="text-[10px] font-medium ml-1" style="color: #52525B;">ERP</span>
             </div>
         </div>
-
-        <nav class="p-4 space-y-6 overflow-y-auto" style="max-height: calc(100vh - 240px);">
-            
-            {% if request.user.is_superuser or request.user.cargo in 'COMER,LIDER,DONO' %}
-            <div class="space-y-1">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Comercial</p>
-                
-                <a href="{% url 'painel_comercial' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-blue-500">🔍</span>
-                    <span>Quadro (Kanban)</span>
-                </a>
-                
-                <a href="{% url 'novo_cliente' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-blue-500">➕</span>
-                    <span>Novo Cliente</span>
-                </a>
-
-                <a href="{% url 'comercial_dashboard' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-blue-500">📊</span>
-                    <span>Meus Resultados</span>
-                </a>
-
-                <a href="{% url 'comercial_clientes_lista' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-blue-500">📋</span>
-                    <span>Meus Clientes</span>
-                </a>
-
-                <a href="{% url 'central_relatorios' %}" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group {% if request.resolver_match.url_name == 'central_relatorios' %}bg-gray-900 text-white{% endif %}">
-                    <span class="text-gray-400 group-hover:text-blue-500">📈</span>
-                    <span>Central de Relatórios</span>
-                </a>
-            </div>
-            {% endif %}
-
-            {% if request.user.is_superuser or request.user.cargo in 'SUPOR,LIDER,DONO' %}
-            <div class="space-y-1">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Suporte Técnico</p>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-amber-500">🚨</span>
-                    <span>Chamados Ativos</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-amber-500">🛠️</span>
-                    <span>Ordens de Serviço</span>
-                </a>
-            </div>
-            {% endif %}
-
-            {% if request.user.is_superuser or request.user.cargo in 'FINAN,DONO' %}
-            <div class="space-y-1">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 mb-2">Financeiro</p>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-emerald-500">💰</span>
-                    <span>Fluxo de Caixa</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-gray-900 hover:text-white transition-all group">
-                    <span class="text-gray-400 group-hover:text-emerald-500">📜</span>
-                    <span>Contratos e Cobranças</span>
-                </a>
-            </div>
-            {% endif %}
-
-        </nav>
     </div>
 
-    <div class="p-4 border-t border-gray-900 bg-gray-950/80 space-y-1">
-        {% if request.user.is_superuser %}
-        <a href="/admin/" target="_blank" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-semibold text-gray-400 hover:bg-gray-900 hover:text-white transition-all">
-            <span>⚙️</span>
-            <span>Painel Django Admin</span>
-        </a>
+    <!-- User info -->
+    <div class="px-4 py-4" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div class="flex items-center gap-3 p-3 rounded-xl"
+            style="background: rgba(138,5,190,0.1); border: 1px solid rgba(138,5,190,0.2);">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm text-white"
+                style="background: linear-gradient(135deg, #8A05BE, #C084F5);">
+                {% if request.user.get_full_name %}
+                    {{ request.user.get_full_name|slice:":1"|upper }}
+                {% else %}
+                    {{ request.user.username|slice:":1"|upper }}
+                {% endif %}
+            </div>
+            <div class="overflow-hidden min-w-0">
+                <p class="text-sm font-semibold text-white truncate leading-tight">
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% else %}
+                        {{ request.user.username }}
+                    {% endif %}
+                </p>
+                <p class="text-[11px] truncate mt-0.5" style="color: #A855F7;">
+                    {{ request.user.get_cargo_display|default:"Colaborador" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+
+        <!-- Início -->
+        <div>
+            <a href="/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                {% if request.resolver_match.url_name == 'home_geral' %}sidebar-link-active{% endif %}">
+                <span class="text-base">🏠</span>
+                <span>Início</span>
+            </a>
+        </div>
+
+        {% if request.user.is_superuser or request.user.cargo in 'COMER,LIDER,DONO' %}
+        <!-- Comercial -->
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest px-3 mb-2" style="color: #3F3F46;">Comercial</p>
+            <div class="space-y-0.5">
+                <a href="{% url 'painel_comercial' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'painel_comercial' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">⬜</span>
+                    <span>Quadro Kanban</span>
+                </a>
+                <a href="{% url 'comercial_dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'comercial_dashboard' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">📊</span>
+                    <span>Meus Resultados</span>
+                </a>
+                <a href="{% url 'comercial_clientes_lista' %}"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'comercial_clientes_lista' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="{% url 'central_relatorios' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'central_relatorios' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">📈</span>
+                    <span>Relatórios</span>
+                </a>
+            </div>
+        </div>
         {% endif %}
-        
-        <form action="/logout/" method="POST" class="w-full">
+
+        <!-- Suporte -->
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest px-3 mb-2" style="color: #3F3F46;">Suporte</p>
+            <div class="space-y-0.5">
+                <a href="{% url 'painel_helpdesk' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'painel_helpdesk' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">🎫</span>
+                    <span>Chamados</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Inventário -->
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest px-3 mb-2" style="color: #3F3F46;">Inventário</p>
+            <div class="space-y-0.5">
+                <a href="{% url 'inventario:lista_ativos' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'lista_ativos' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">🖥️</span>
+                    <span>Ativos de TI</span>
+                </a>
+                <a href="{% url 'inventario:lista_movimentacoes' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
+                    {% if request.resolver_match.url_name == 'lista_movimentacoes' or request.resolver_match.url_name == 'tela_movimentacao' %}sidebar-link-active{% endif %}">
+                    <span class="text-base">🚚</span>
+                    <span>Movimentações</span>
+                </a>
+                <a href="{% url 'inventario:bipagem_lote' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+                    <span class="text-base">⚡</span>
+                    <span>Inventário em Lote</span>
+                </a>
+                <a href="{% url 'inventario:lista_modelos' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+                    <span class="text-base">📦</span>
+                    <span>Catálogo de Modelos</span>
+                </a>
+            </div>
+        </div>
+
+
+        {% if request.user.is_superuser %}
+        <!-- Admin -->
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest px-3 mb-2" style="color: #3F3F46;">Sistema</p>
+            <div class="space-y-0.5">
+                <a href="/admin/" target="_blank"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all">
+                    <span class="text-base">⚙️</span>
+                    <span>Django Admin</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </nav>
+
+    <!-- Footer: logout -->
+    <div class="p-3" style="border-top: 1px solid rgba(255,255,255,0.05);">
+        <form action="/logout/" method="POST">
             {% csrf_token %}
-            <button type="submit" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-bold text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-all text-left cursor-pointer">
-                <span>🚪</span>
-                <span>Sair do Sistema</span>
+            <button type="submit"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left cursor-pointer group"
+                style="color: #71717A;"
+                onmouseover="this.style.background='rgba(244,114,182,0.08)'; this.style.color='#F472B6';"
+                onmouseout="this.style.background='transparent'; this.style.color='#71717A';">
+                <span class="text-base">🚪</span>
+                <span>Sair do sistema</span>
             </button>
         </form>
     </div>
 </aside>
 
-<script>
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+<!-- Mobile toggle button — sem onclick inline para compatibilidade máxima com tablets -->
+<button
+    id="sidebar-toggle-btn"
+    aria-label="Abrir menu"
+    aria-expanded="false"
+    class="fixed top-4 left-4 z-[60] lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white"
+    style="background: #8A05BE; box-shadow: 0 4px 14px rgba(138,5,190,0.4); touch-action: manipulation;">
+    <span id="toggle-icon" style="font-size: 18px; line-height: 1; pointer-events: none;">☰</span>
+</button>
 
-    toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sidebar.classList.toggle('-translate-x-full');
-    });
+<!-- Backdrop: toque fora da sidebar para fechar (mobile/tablet) -->
+<div id="sidebar-backdrop"
+     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(2px); z-index: 39; touch-action: manipulation;">
+</div>
 
-    document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && e.target !== toggleBtn) {
-            if (window.innerWidth < 1024) {
-                sidebar.classList.add('-translate-x-full');
-            }
+<style>
+    /* ── Links da sidebar ─────────────────────────────────────────────── */
+    .sidebar-link { color: #71717A; }
+    .sidebar-link:hover { background: rgba(138,5,190,0.12); color: #C084F5; }
+    .sidebar-link-active {
+        background: rgba(138,5,190,0.2) !important;
+        color: #C084F5 !important;
+        border: 1px solid rgba(138,5,190,0.3);
+    }
+
+    /* ── Estado inicial da sidebar em mobile ──────────────────────────── */
+    /*
+     * Usamos a classe .sidebar-open para ABRIR (ao invés de toggle),
+     * garantindo que o estado inicial (fechado) seja previsível.
+     * Em desktop (≥ 1024px) a sidebar é sempre visível — sem transforms.
+     */
+    @media (max-width: 1023px) {
+        #app-sidebar {
+            transform: translateX(-100%);  /* fechada por padrão */
         }
+        #app-sidebar.sidebar-open {
+            transform: translateX(0);      /* aberta quando tem a classe */
+        }
+        #main-content {
+            margin-left: 0 !important;
+        }
+    }
+
+    /* ── Animação do botão toggle ─────────────────────────────────────── */
+    #sidebar-toggle-btn {
+        transition: background 0.2s, transform 0.15s;
+    }
+    #sidebar-toggle-btn:active {
+        transform: scale(0.92);
+    }
+</style>
+
+<script>
+(function () {
+    /**
+     * Sidebar Toggle — compatível com desktop, tablet e mobile.
+     *
+     * Estratégia:
+     *  - Usa "sidebar-open" como classe de estado (simples e determinístico).
+     *  - Escuta AMBOS os eventos: 'click' e 'touchstart'.
+     *  - e.preventDefault() no touchstart evita o disparo duplo (ghost click).
+     *  - O backdrop fecha a sidebar ao toque fora dela.
+     *  - ESC fecha a sidebar no teclado (acessibilidade).
+     */
+
+    const sidebar   = document.getElementById('app-sidebar');
+    const backdrop  = document.getElementById('sidebar-backdrop');
+    const toggleBtn = document.getElementById('sidebar-toggle-btn');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    function abrirSidebar() {
+        sidebar.classList.add('sidebar-open');
+        backdrop.style.display = 'block';
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleIcon.textContent = '✕';
+    }
+
+    function fecharSidebar() {
+        sidebar.classList.remove('sidebar-open');
+        backdrop.style.display = 'none';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleIcon.textContent = '☰';
+    }
+
+    function toggleSidebar() {
+        if (sidebar.classList.contains('sidebar-open')) {
+            fecharSidebar();
+        } else {
+            abrirSidebar();
+        }
+    }
+
+    // ── Expõe globalmente para templates que chamam toggleSidebar() ──────
+    window.toggleSidebar = toggleSidebar;
+
+    // ── Botão toggle: click (desktop) + touchstart (mobile/tablet) ───────
+    toggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleSidebar();
     });
+    toggleBtn.addEventListener('touchstart', function (e) {
+        e.preventDefault();      // cancela o ghost click de 300ms
+        e.stopPropagation();
+        toggleSidebar();
+    }, { passive: false });
+
+    // ── Backdrop: fecha ao tocar fora ────────────────────────────────────
+    backdrop.addEventListener('click', fecharSidebar);
+    backdrop.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        fecharSidebar();
+    }, { passive: false });
+
+    // ── ESC: fecha a sidebar (acessibilidade teclado) ────────────────────
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') fecharSidebar();
+    });
+
+    // ── Fecha ao clicar em links dentro da sidebar (mobile UX) ──────────
+    sidebar.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth < 1024) fecharSidebar();
+        });
+    });
+})();
 </script>

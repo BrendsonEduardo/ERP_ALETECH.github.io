@@ -3,95 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novo Cliente - AleTech</title>
+    <title>Novo Cliente — AleTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root { --surface-0: #09090B; --surface-2: #18181F; --surface-3: #1E1E28; --border: rgba(255,255,255,0.07); }
+        body { background: var(--surface-0); color: #E4E4F0; }
+        .nu-input { background: var(--surface-3); border: 1px solid var(--border); border-radius: 10px; color: #E4E4F0; padding: 11px 14px; font-size: 14px; width: 100%; transition: all 0.2s; outline: none; }
+        .nu-input:focus { border-color: rgba(138,5,190,0.6); box-shadow: 0 0 0 3px rgba(138,5,190,0.15); }
+        .nu-input::placeholder { color: #52525B; }
+        .nu-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 6px; }
+        select.nu-input option { background: #18181F; color: #E4E4F0; }
+        textarea.nu-input { resize: vertical; }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 m-0 p-0">
+<body>
 
     {% include "partials/sidebar.html" %}
 
-    <div class="lg:ml-64 min-h-screen p-6 transition-all duration-300">
-        
-        <div class="mb-6 mt-12 lg:mt-0 flex items-center justify-between">
-            <div>
-                <a href="{% url 'painel_comercial' %}" class="text-sm text-blue-600 hover:underline">← Voltar ao Painel</a>
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mt-1">Cadastrar Novo Cliente</h1>
-            </div>
+    <div style="margin-left: 256px; min-height: 100vh; padding: 40px 32px;" id="main-content">
+        <button onclick="toggleSidebar()" style="display:none;" id="mobile-toggle" class="fixed top-4 left-4 z-50 lg:hidden"></button>
+
+        <!-- Back + Title -->
+        <div style="margin-bottom: 28px;">
+            <a href="{% url 'painel_comercial' %}"
+               style="font-size: 12px; font-weight: 600; color: #71717A; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; transition: color 0.15s;"
+               onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#71717A'">← Voltar ao Painel</a>
+            <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Cadastrar Novo Cliente</h1>
+            <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Preencha as informações para adicionar à sua carteira.</p>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-3xl">
+        <!-- Form Card -->
+        <div style="max-width: 720px; background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 32px;">
             <form action="{% url 'novo_cliente' %}" method="POST" enctype="multipart/form-data" id="formCliente" onsubmit="limparMascaraDocumento()">
                 {% csrf_token %}
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Cadastro</label>
-                        <select name="tipo" id="tipoPessoa" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500 bg-white" onchange="ajustarFormularioPorTipo()">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+
+                    <div style="grid-column: 1 / -1;">
+                        <label class="nu-label">Tipo de Cadastro</label>
+                        <select name="tipo" id="tipoPessoa" class="nu-input" onchange="ajustarFormularioPorTipo()">
                             <option value="PJ" selected>Pessoa Jurídica (Empresa)</option>
                             <option value="PF">Pessoa Física (Individual)</option>
                         </select>
                     </div>
 
                     <div>
-                        <label id="labelNomeFantasia" class="block text-sm font-semibold text-gray-700 mb-1">Nome Fantasia *</label>
-                        <input type="text" name="nome_fantasia" required class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                        <label id="labelNomeFantasia" class="nu-label">Nome Fantasia *</label>
+                        <input type="text" name="nome_fantasia" required class="nu-input" placeholder="Ex: Tech Solutions Ltda">
                     </div>
 
                     <div id="blocoRazaoSocial">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Razão Social</label>
-                        <input type="text" name="razao_social" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                        <label class="nu-label">Razão Social</label>
+                        <input type="text" name="razao_social" class="nu-input" placeholder="Razão social completa">
                     </div>
 
                     <div>
-                        <label id="labelDocumento" class="block text-sm font-semibold text-gray-700 mb-1">CNPJ *</label>
-                        <input type="text" name="cnpj_cpf" id="cnpj_cpf" required placeholder="00.000.000/0000-00" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                        <label id="labelDocumento" class="nu-label">CNPJ *</label>
+                        <input type="text" name="cnpj_cpf" id="cnpj_cpf" required placeholder="00.000.000/0000-00" class="nu-input">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">E-mail de Contato *</label>
-                        <input type="email" name="email" required placeholder="exemplo@empresa.com" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                        <label class="nu-label">E-mail de Contato *</label>
+                        <input type="email" name="email" required placeholder="contato@empresa.com" class="nu-input">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Telefone / WhatsApp *</label>
-                        <input type="text" name="telefone" required placeholder="(00) 00000-0000" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                        <label class="nu-label">Telefone / WhatsApp *</label>
+                        <input type="text" name="telefone" required placeholder="(00) 00000-0000" class="nu-input">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Ficha Cadastral (PDF/Imagem)</label>
-                        <input type="file" name="ficha_cadastral" accept=".pdf,image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                        <label class="nu-label">Ficha Cadastral (PDF)</label>
+                        <input type="file" name="ficha_cadastral" accept=".pdf,image/*"
+                               style="width: 100%; font-size: 12px; color: #71717A; background: #1E1E28; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 14px; cursor: pointer;">
                     </div>
 
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Contato Responsável / Ponto de Contato</label>
-                        <input type="text" name="contato_responsavel" placeholder="Ex: Rosângelo Sousa (Financeiro / TI)" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500">
+                    <div style="grid-column: 1 / -1;">
+                        <label class="nu-label">Contato Responsável</label>
+                        <input type="text" name="contato_responsavel" placeholder="Ex: Rosângelo Sousa (Financeiro / TI)" class="nu-input">
                     </div>
 
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Endereço Completo</label>
-                        <textarea name="endereco" rows="2" placeholder="Rua, Número, Bairro, Cidade - UF" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-blue-500"></textarea>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="nu-label">Endereço Completo</label>
+                        <textarea name="endereco" rows="2" placeholder="Rua, Número, Bairro, Cidade - UF" class="nu-input"></textarea>
                     </div>
 
                 </div>
 
-                <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end space-x-2">
-                    <a href="{% url 'painel_comercial' %}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200 font-medium">Cancelar</a>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 shadow font-semibold">Salvar e Avançar →</button>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <a href="{% url 'painel_comercial' %}"
+                       style="padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: all 0.15s;"
+                       onmouseover="this.style.color='#A1A1AA'" onmouseout="this.style.color='#71717A'">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            style="padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; color: white; background: linear-gradient(135deg, #8A05BE, #6B03A0); border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.2s;"
+                            onmouseover="this.style.boxShadow='0 6px 20px rgba(138,5,190,0.45)'; this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.boxShadow='0 4px 14px rgba(138,5,190,0.3)'; this.style.transform='translateY(0)'">
+                        Salvar e Avançar →
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Melhora a UX adaptando os labels conforme a escolha de PF ou PJ
         function ajustarFormularioPorTipo() {
             const tipo = document.getElementById('tipoPessoa').value;
             const labelNomeFantasia = document.getElementById('labelNomeFantasia');
             const blocoRazaoSocial = document.getElementById('blocoRazaoSocial');
             const labelDocumento = document.getElementById('labelDocumento');
             const inputDocumento = document.getElementById('cnpj_cpf');
-
             if (tipo === 'PF') {
                 labelNomeFantasia.textContent = 'Nome Completo *';
                 blocoRazaoSocial.style.display = 'none';
@@ -104,12 +130,13 @@
                 inputDocumento.placeholder = '00.000.000/0000-00';
             }
         }
-
-        // INTEGRIDADE DE DADOS: Remove pontos, hífens e barras antes do envio para o Django
         function limparMascaraDocumento() {
             const inputDocumento = document.getElementById('cnpj_cpf');
-            // Remove tudo que não for número antes do POST
             inputDocumento.value = inputDocumento.value.replace(/\D/g, '');
+        }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            sidebar.classList.toggle('-translate-x-full');
         }
     </script>
 </body>

@@ -2,147 +2,234 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Comercial - AleTech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Comercial — AleTech ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root { --nu-purple: #8A05BE; --surface-0: #09090B; --surface-2: #18181F; --surface-3: #1E1E28; --border: rgba(255,255,255,0.07); }
+        body { background: var(--surface-0); color: #E4E4F0; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; user-select: none; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.25); border-radius: 99px; }
+
+        /* Kanban column */
+        .kanban-col {
+            display: flex; flex-direction: column; flex-shrink: 0; width: 290px;
+            background: #111117; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; height: 100%;
+        }
+        .kanban-col-header {
+            padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05); border-radius: 16px 16px 0 0; flex-shrink: 0;
+        }
+        .kanban-col-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+        .kanban-col-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+        .kanban-body { overflow-y: auto; padding: 10px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+
+        /* Column colors */
+        .col-prospeccao { border-top: 2px solid #71717A; }
+        .col-prospeccao .kanban-col-title { color: #A1A1AA; }
+        .col-prospeccao .kanban-col-badge { background: rgba(161,161,170,0.1); color: #A1A1AA; }
+
+        .col-teste { border-top: 2px solid #60A5FA; }
+        .col-teste .kanban-col-title { color: #60A5FA; }
+        .col-teste .kanban-col-badge { background: rgba(96,165,250,0.1); color: #60A5FA; }
+
+        .col-qualificacao { border-top: 2px solid #A78BFA; }
+        .col-qualificacao .kanban-col-title { color: #A78BFA; }
+        .col-qualificacao .kanban-col-badge { background: rgba(167,139,250,0.1); color: #A78BFA; }
+
+        .col-proposta { border-top: 2px solid #C084F5; }
+        .col-proposta .kanban-col-title { color: #C084F5; }
+        .col-proposta .kanban-col-badge { background: rgba(192,132,245,0.1); color: #C084F5; }
+
+        .col-negociacao { border-top: 2px solid #FCD34D; }
+        .col-negociacao .kanban-col-title { color: #FCD34D; }
+        .col-negociacao .kanban-col-badge { background: rgba(252,211,77,0.1); color: #FCD34D; }
+
+        .col-ganhou { border-top: 2px solid #34D399; }
+        .col-ganhou .kanban-col-title { color: #34D399; }
+        .col-ganhou .kanban-col-badge { background: rgba(52,211,153,0.1); color: #34D399; }
+
+        .col-perdeu { border-top: 2px solid #F472B6; }
+        .col-perdeu .kanban-col-title { color: #F472B6; }
+        .col-perdeu .kanban-col-badge { background: rgba(244,114,182,0.1); color: #F472B6; }
+
+        /* Stat mini cards */
+        .stat-mini { background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 12px 16px; }
+
+        /* Toast notification */
+        #kanban-toast {
+            display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            background: rgba(244,114,182,0.15); color: #F472B6; border: 1px solid rgba(244,114,182,0.3);
+            padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 600;
+            backdrop-filter: blur(8px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            align-items: center; gap: 8px;
+        }
+
+        /* Drag states */
+        .sortable-ghost { opacity: 0.3; }
+        .sortable-chosen { box-shadow: 0 0 0 2px rgba(138,5,190,0.6) !important; }
+        .sortable-drag { box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important; }
+
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 m-0 p-0 select-none overflow-hidden h-screen flex flex-col">
+<body>
 
     {% csrf_token %}
 
     {% include "partials/sidebar.html" %}
 
-    <div class="lg:ml-64 h-screen max-h-screen p-6 flex flex-col transition-all duration-300 overflow-hidden">
+    <div id="main-content" style="margin-left: 256px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: margin 0.3s;">
 
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 mt-12 lg:mt-0 gap-4 flex-none">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Gerenciamento de Oportunidades</h1>
-                <p class="text-sm text-gray-500">Olá, {{ request.user.get_full_name|default:request.user.username }}</p>
-            </div>
-            
-            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg shadow-xs border border-gray-200">
-                    <label for="filtroVendedor" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Vendedor:</label>
-                    <select id="filtroVendedor" class="text-xs bg-transparent border-none text-gray-800 font-semibold focus:outline-none cursor-pointer">
-                        <option value="todos">Todos os Responsáveis</option>
+        <!-- Top bar -->
+        <div style="flex-shrink: 0; padding: 20px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: #09090B;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div>
+                    <h1 style="font-size: 20px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Quadro Kanban</h1>
+                    <p style="font-size: 12px; color: #71717A; margin: 2px 0 0;">{{ request.user.get_full_name|default:request.user.username }} · {{ data_inicio }} → {{ data_fim }}</p>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <!-- Date filter -->
+                    <form method="GET" style="display: flex; align-items: center; gap: 6px;">
+                        <input type="date" name="data_inicio" value="{{ data_inicio }}"
+                               style="background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #A1A1AA; padding: 7px 10px; font-size: 12px; outline: none; font-family: Inter;">
+                        <span style="color: #52525B; font-size: 11px;">a</span>
+                        <input type="date" name="data_fim" value="{{ data_fim }}"
+                               style="background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #A1A1AA; padding: 7px 10px; font-size: 12px; outline: none; font-family: Inter;">
+                        <button type="submit" style="background: rgba(138,5,190,0.15); color: #C084F5; border: 1px solid rgba(138,5,190,0.3); border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: Inter;">Filtrar</button>
+                    </form>
+
+                    <!-- Seller filter -->
+                    <select id="filtroVendedor"
+                            style="background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #A1A1AA; padding: 7px 10px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; font-family: Inter;">
+                        <option value="todos">Todos os vendedores</option>
                     </select>
+
+                    <a href="{% url 'novo_cliente' %}"
+                       style="background: rgba(255,255,255,0.06); color: #E4E4F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.15s;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+                        + Cliente
+                    </a>
+                    <a href="{% url 'nova_oportunidade' %}"
+                       style="background: linear-gradient(135deg, #8A05BE, #6B03A0); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.15s;"
+                       onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                        + Nova Demanda
+                    </a>
                 </div>
-                <div class="space-x-2 flex flex-none">
-                    <a href="{% url 'novo_cliente' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 text-sm font-semibold transition-colors">+ Novo Cliente</a>
-                    <a href="{% url 'nova_oportunidade' %}" class="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-black text-sm font-semibold transition-colors">+ Nova Demanda</a>
+            </div>
+
+            <!-- Mini KPIs -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                <div class="stat-mini">
+                    <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin: 0 0 4px;">Leads</p>
+                    <p style="font-size: 22px; font-weight: 900; color: #FAFAFA; margin: 0; line-height: 1;">{{ total_leads }}</p>
+                </div>
+                <div class="stat-mini">
+                    <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin: 0 0 4px;">Propostas</p>
+                    <p style="font-size: 22px; font-weight: 900; color: #60A5FA; margin: 0; line-height: 1;">{{ propostas_abertas }}</p>
+                </div>
+                <div class="stat-mini">
+                    <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin: 0 0 4px;">Pipeline</p>
+                    <p style="font-size: 16px; font-weight: 900; color: #FCD34D; margin: 0; line-height: 1;">R$&nbsp;{{ total_em_negociacao|floatformat:2 }}</p>
+                </div>
+                <div class="stat-mini">
+                    <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin: 0 0 4px;">Ganho</p>
+                    <p style="font-size: 16px; font-weight: 900; color: #34D399; margin: 0; line-height: 1;">R$&nbsp;{{ total_ganho|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 flex-none">
-            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leads Ativos</p>
-                <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ total_leads }}</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Propostas em Aberto</p>
-                <p class="text-2xl font-extrabold text-blue-600 mt-1">{{ propostas_abertas }}</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Em Negociação</p>
-                <p class="text-2xl font-extrabold text-amber-600 mt-1">R$ {{ total_em_negociacao|floatformat:2 }}</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Faturamento Ganho</p>
-                <p class="text-2xl font-extrabold text-emerald-600 mt-1">R$ {{ total_ganho|floatformat:2 }}</p>
-            </div>
-        </div>
+        <!-- Kanban Board -->
+        <div style="flex: 1; overflow-x: auto; overflow-y: hidden; padding: 16px; display: flex; gap: 12px; min-height: 0; align-items: stretch;">
 
-        <div id="kanban-toast" class="hidden fixed bottom-5 right-5 bg-rose-600 text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium z-50 items-center gap-2 transition-all">
-            <span>⚠️</span> <span id="toast-message">Erro ao salvar alteração.</span>
-        </div>
-
-        <div class="flex flex-1 overflow-x-auto gap-4 pb-4 items-stretch min-h-0 w-full scrollbar-thin">
-            
-            <div class="flex flex-col flex-none w-[310px] bg-gray-100/80 border border-gray-200 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-gray-700 border-b border-gray-200 flex justify-between items-center bg-gray-100 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">EM PROSPECÇÃO</span>
-                    <span class="column-count bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ prospeccao|length }}</span>
+            <!-- Prospecção -->
+            <div class="kanban-col col-prospeccao">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">Prospecção</span>
+                    <span class="kanban-col-badge column-count">{{ prospeccao|length }}</span>
                 </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Prospecção">
-                    {% for op in prospeccao %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
+                <div class="kanban-body" id="Prospecção">
+                    {% for op in prospeccao %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
                 </div>
             </div>
 
-            <div class="flex flex-col flex-none w-[310px] bg-sky-50/50 border border-sky-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-sky-800 border-b border-sky-100 flex justify-between items-center bg-sky-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">EM TESTE</span>
-                    <span class="column-count bg-sky-100 text-sky-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ em_teste|length }}</span>
+            <!-- Em Teste -->
+            <div class="kanban-col col-teste">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">🔬 Em Teste</span>
+                    <span class="kanban-col-badge column-count">{{ em_teste|length }}</span>
                 </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Em_Teste">
-                    {% for op in em_teste %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="flex flex-col flex-none w-[310px] bg-blue-50/50 border border-blue-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-blue-800 border-b border-blue-100 flex justify-between items-center bg-blue-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">QUALIFICAÇÕES</span>
-                    <span class="column-count bg-blue-100 text-blue-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ qualificacao|length }}</span>
-                </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Qualificacao">
-                    {% for op in qualificacao %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
+                <div class="kanban-body" id="Em_Teste">
+                    {% for op in em_teste %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
                 </div>
             </div>
 
-            <div class="flex flex-col flex-none w-[310px] bg-purple-50/50 border border-purple-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-purple-800 border-b border-purple-100 flex justify-between items-center bg-purple-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">PROPOSTAS ENVIADAS</span>
-                    <span class="column-count bg-purple-100 text-purple-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ proposta|length }}</span>
+            <!-- Qualificação -->
+            <div class="kanban-col col-qualificacao">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">Qualificação</span>
+                    <span class="kanban-col-badge column-count">{{ qualificacao|length }}</span>
                 </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Proposta">
-                    {% for op in proposta %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="flex flex-col flex-none w-[310px] bg-amber-50/50 border border-amber-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-amber-800 border-b border-amber-100 flex justify-between items-center bg-amber-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">EM NEGOCIAÇÃO</span>
-                    <span class="column-count bg-amber-100 text-amber-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ negociacao|length }}</span>
-                </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Negociacao">
-                    {% for op in negociacao %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
+                <div class="kanban-body" id="Qualificação">
+                    {% for op in qualificacao %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
                 </div>
             </div>
 
-            <div class="flex flex-col flex-none w-[310px] bg-emerald-50/50 border border-emerald-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-emerald-800 border-b border-emerald-100 flex justify-between items-center bg-emerald-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">APROVADOS</span>
-                    <span class="column-count bg-emerald-100 text-emerald-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ ganhou|length }}</span>
+            <!-- Proposta -->
+            <div class="kanban-col col-proposta">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">Proposta</span>
+                    <span class="kanban-col-badge column-count">{{ proposta|length }}</span>
                 </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Fechado_Ganhou">
-                    {% for op in ganhou %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
+                <div class="kanban-body" id="Proposta">
+                    {% for op in proposta %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
                 </div>
             </div>
 
-            <div class="flex flex-col flex-none w-[310px] bg-rose-50/50 border border-rose-100 rounded-xl shadow-xs h-full">
-                <div class="p-3 font-bold text-rose-800 border-b border-rose-100 flex justify-between items-center bg-rose-50 rounded-t-xl flex-none">
-                    <span class="text-xs uppercase tracking-wider">❌ Perdido</span>
-                    <span class="column-count bg-rose-100 text-rose-600 text-xs px-2.5 py-0.5 rounded-full font-bold">{{ perdeu|length }}</span>
+            <!-- Negociação -->
+            <div class="kanban-col col-negociacao">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">Negociação</span>
+                    <span class="kanban-col-badge column-count">{{ negociacao|length }}</span>
                 </div>
-                <div class="overflow-y-auto p-2 flex-1 space-y-2 min-h-0" id="Fechado_Perdeu">
-                    {% for op in perdeu %}
-                        {% include "comercial/partials/card_kanban.html" with op=op %}
-                    {% endfor %}
+                <div class="kanban-body" id="Negociação">
+                    {% for op in negociacao %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
+                </div>
+            </div>
+
+            <!-- Aprovados -->
+            <div class="kanban-col col-ganhou">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">🏆 Aprovados</span>
+                    <span class="kanban-col-badge column-count">{{ ganhou|length }}</span>
+                </div>
+                <div class="kanban-body" id="Fechado_Ganhou">
+                    {% for op in ganhou %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
+                </div>
+            </div>
+
+            <!-- Perdidos -->
+            <div class="kanban-col col-perdeu">
+                <div class="kanban-col-header">
+                    <span class="kanban-col-title">❌ Perdidos</span>
+                    <span class="kanban-col-badge column-count">{{ perdeu|length }}</span>
+                </div>
+                <div class="kanban-body" id="Fechado_Perdeu">
+                    {% for op in perdeu %}{% include "comercial/partials/card_kanban.html" with op=op %}{% endfor %}
                 </div>
             </div>
 
         </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="kanban-toast" style="display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: rgba(244,114,182,0.15); color: #F472B6; border: 1px solid rgba(244,114,182,0.3); padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 8px;">
+        <span>⚠</span> <span id="toast-message">Erro ao salvar.</span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -151,139 +238,87 @@
         const toast = document.getElementById('kanban-toast');
         const toastMsg = document.getElementById('toast-message');
 
-        function mostrarErro(mensagem) {
-            toastMsg.textContent = message;
-            toast.classList.remove('hidden');
-            toast.classList.add('flex');
-            setTimeout(() => {
-                toast.classList.remove('flex');
-                toast.classList.add('hidden');
-            }, 4000);
+        function mostrarToast(msg) {
+            toastMsg.textContent = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
         }
 
-        // Função de contagem atualizada para considerar apenas elementos visíveis (não ocultos pelo filtro)
-        function atualizarContadoresColunas(colunaOrigem, colunaDestino) {
-            const contarVisiveis = (coluna) => {
-                return Array.from(coluna.children).filter(card => card.style.display !== 'none').length;
-            };
-
-            if (colunaOrigem) {
-                const badgeOrigem = colunaOrigem.parentElement.querySelector('.column-count');
-                if (badgeOrigem) badgeOrigem.textContent = contarVisiveis(colunaOrigem);
-            }
-            if (colunaDestino && colunaOrigem !== colunaDestino) {
-                const badgeDestino = colunaDestino.parentElement.querySelector('.column-count');
-                if (badgeDestino) badgeDestino.textContent = contarVisiveis(colunaDestino);
-            }
+        function atualizarContadores(origem, destino) {
+            const contar = (col) => Array.from(col.children).filter(c => c.style.display !== 'none').length;
+            if (origem) { const b = origem.closest('.kanban-col').querySelector('.column-count'); if (b) b.textContent = contar(origem); }
+            if (destino && destino !== origem) { const b = destino.closest('.kanban-col').querySelector('.column-count'); if (b) b.textContent = contar(destino); }
         }
 
-        // --- SISTEMA DINÂMICO DE FILTRAGEM POR VENDEDOR ---
+        // Seller filter
         document.addEventListener('DOMContentLoaded', function() {
-            const filtroSelect = document.getElementById('filtroVendedor');
-            const colunas = document.querySelectorAll('.overflow-y-auto[id]');
-            
-            // 1. Mapeia todos os elementos internos para identificar onde o crachá do vendedor está renderizado
-            const obterNomeVendedorDeCard = (card) => {
-                // Procura por blocos de texto que contenham padrões como "COMERCIAL_" ou nomes baseados na imagem
-                const elementosTexto = card.querySelectorAll('span, div, p');
-                for (let elem of elementosTexto) {
-                    const texto = elem.textContent.trim();
-                    if (texto.includes('COMERCIAL_') || (elem.classList.contains('bg-gray-100') && texto.length > 2)) {
-                        return texto;
-                    }
-                }
-                // Fallback caso não ache uma estrutura padrão, lê o texto do rodapé do card
-                return card.textContent.includes('COMERCIAL_') ? 'COMERCIAL_' : null;
-            };
+            const filtro = document.getElementById('filtroVendedor');
+            const colunas = document.querySelectorAll('.kanban-body');
+            const vendedores = new Set();
 
-            // 2. Coleta os vendedores únicos presentes nos cards para alimentar o Select
-            const vendedoresUnicos = new Set();
-            colunas.forEach(coluna => {
-                Array.from(coluna.children).forEach(card => {
-                    const nomeVendedor = obterNomeVendedorDeCard(card);
-                    if (nomeVendedor) {
-                        card.setAttribute('data-vendedor-tag', nomeVendedor); // Guarda como metadado no card
-                        vendedoresUnicos.add(nomeVendedor);
+            colunas.forEach(col => {
+                Array.from(col.children).forEach(card => {
+                    const spans = card.querySelectorAll('span');
+                    for (const span of spans) {
+                        const txt = span.textContent.trim();
+                        if (txt.length > 1 && txt.length < 30 && !txt.includes('R$') && !txt.includes('🔬') && !txt.includes('✏') && !txt.includes('👁') && span.style.borderRadius === '99px') {
+                            card.setAttribute('data-vendedor', txt);
+                            vendedores.add(txt);
+                            break;
+                        }
                     }
                 });
             });
 
-            // 3. Popula o menu Dropdown
-            vendedoresUnicos.forEach(vendedor => {
+            vendedores.forEach(v => {
                 const opt = document.createElement('option');
-                opt.value = vendedor;
-                opt.textContent = vendedor;
-                filtroSelect.appendChild(opt);
+                opt.value = v; opt.textContent = v;
+                filtro.appendChild(opt);
             });
 
-            // 4. Aplica a ação de Filtragem e atualiza as badges numéricas das colunas
-            filtroSelect.addEventListener('change', function() {
-                const vendedorSelecionado = this.value;
-
-                colunas.forEach(coluna => {
-                    Array.from(coluna.children).forEach(card => {
-                        const vCard = card.getAttribute('data-vendedor-tag');
-                        if (vendedorSelecionado === 'todos' || vCard === vendedorSelecionado) {
-                            card.style.display = '';
-                        } else {
-                            card.style.display = 'none';
-                        }
+            filtro.addEventListener('change', function() {
+                const sel = this.value;
+                colunas.forEach(col => {
+                    Array.from(col.children).forEach(card => {
+                        const v = card.getAttribute('data-vendedor');
+                        card.style.display = (sel === 'todos' || v === sel) ? '' : 'none';
                     });
-                    // Atualiza o contador individual da coluna respectiva
-                    atualizarContadoresColunas(coluna, null);
+                    atualizarContadores(col, null);
                 });
             });
         });
 
-        document.querySelectorAll('.overflow-y-auto[id]').forEach(column => {
-            new Sortable(column, {
-                group: 'kanban',
-                animation: 180,
-                ghostClass: 'opacity-40',
-                chosenClass: 'border-blue-500',
-                forceFallback: false,
-
-                onStart: function() {
-                    document.body.style.overflow = 'hidden';
-                },
-                
-                onEnd: function (evt) {
-                    document.body.style.overflow = '';
-                    
-                    const itemEl = evt.item;
-                    const oportunidadeId = itemEl.getAttribute('data-id');
-                    const novoEstagio = evt.to.id;
-                    
+        // SortableJS
+        document.querySelectorAll('.kanban-body').forEach(col => {
+            new Sortable(col, {
+                group: 'kanban', animation: 200,
+                ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag',
+                onEnd: function(evt) {
                     if (evt.from === evt.to) return;
-                    
-                    atualizarContadoresColunas(evt.from, evt.to);
-                    
+                    atualizarContadores(evt.from, evt.to);
+                    const id = evt.item.getAttribute('data-id');
+                    const estagio = evt.to.id;
                     fetch("{% url 'atualizar_estagio_kanban' %}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": csrftoken
-                        },
-                        body: JSON.stringify({
-                            id: oportunidadeId,
-                            estagio: novoEstagio
-                        })
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                        body: JSON.stringify({ id, estagio })
                     })
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
                         if (data.status === 'error') {
-                            mostrarErro(data.message || 'Movimentação não autorizada.');
+                            mostrarToast(data.message || 'Movimentação não autorizada.');
                             setTimeout(() => window.location.reload(), 1500);
                         }
                     })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        mostrarErro('Instabilidade na rede. Sincronizando quadro...');
+                    .catch(() => {
+                        mostrarToast('Erro de conexão. Sincronizando...');
                         setTimeout(() => window.location.reload(), 2000);
                     });
                 }
             });
         });
+
+        function toggleSidebar() { document.getElementById('app-sidebar').classList.toggle('-translate-x-full'); }
     </script>
 </body>
 </html>

@@ -1,148 +1,127 @@
 {% extends 'base.html' %}
+{% block title %}Editar Oportunidade — AleTech ERP{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-    
-    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-        <div>
-            <h2 class="text-xl font-bold text-gray-800">Editar Oportunidade</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Atualize os parâmetros e valores do funil de vendas</p>
-        </div>
-        <a href="{% url 'painel_comercial' %}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition">
-            &larr; Voltar ao Kanban
-        </a>
+<div style="max-width: 700px; margin: 0 auto;">
+
+    <!-- Back + Title -->
+    <div style="margin-bottom: 24px;">
+        <a href="{% url 'painel_comercial' %}"
+           style="font-size: 12px; font-weight: 600; color: #71717A; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; transition: color 0.15s;"
+           onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#71717A'">← Voltar ao Kanban</a>
+        <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Editar Oportunidade</h1>
+        <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Atualize os parâmetros e valores do funil</p>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="space-y-5">
-        {% csrf_token %}
+    <div class="glass-card" style="padding: 32px;">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-        <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Título da Proposta/Oportunidade *</label>
-            <input type="text" name="titulo" value="{{ op.titulo }}" required
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-900 font-medium">
-        </div>
+            <div style="display: flex; flex-direction: column; gap: 18px;">
 
-        <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Cliente Vinculado</label>
-            <select class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-not-allowed focus:outline-none shadow-sm" disabled>
-                {% for cliente in clientes %}
-                    <option value="{{ cliente.id }}" {% if cliente.id == op.cliente.id %}selected{% endif %}>
-                        {{ cliente.nome_fantasia }} ({% if cliente.tipo == 'PJ' %}CNPJ{% else %}CPF{% endif %}: {{ cliente.cnpj_cpf }})
-                    </option>
-                {% endfor %}
-            </select>
-            <input type="hidden" name="cliente" value="{{ op.cliente.id }}">
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Valor Estimado (R$) *</label>
-                <input type="text" id="valor_estimado_visivel" required placeholder="0,00"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
-                
-                <input type="hidden" name="valor_estimado" id="valor_estimado" value="{{ op.valor_estimado|stringformat:'.2f' }}">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Estágio no Funil</label>
-                <select name="estagio" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-700 font-medium">
-                    <option value="Prospecção" {% if op.estagio == 'Prospecção' %}selected{% endif %}>Prospecção</option>
-                    <option value="Qualificação" {% if op.estagio == 'Qualificação' %}selected{% endif %}>Qualificação</option>
-                    <option value="Proposta" {% if op.estagio == 'Proposta' %}selected{% endif %}>Proposta Enviada</option>
-                    <option value="Negociação" {% if op.estagio == 'Negociação' %}selected{% endif %}>Negociação</option>
-                    <option value="Fechado_Ganhou" {% if op.estagio == 'Fechado_Ganhou' %}selected{% endif %}>🏆 Fechado (Ganhou)</option>
-                    <option value="Fechado_Perdeu" {% if op.estagio == 'Fechado_Perdeu' %}selected{% endif %}>❌ Fechado (Perdeu)</option>
-                </select>
-            </div>
-        </div>
-
-        <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Descrição / Observações da Negociação</label>
-            <textarea name="descricao" rows="4" placeholder="Detalhes da evolução do lead, escopo técnico do projeto..."
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">{% if op.descricao %}{{ op.descricao }}{% endif %}</textarea>
-        </div>
-
-        <div class="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Proposta Técnica ou Contrato Comercial (PDF)</label>
-            <input type="file" name="contrato_proposta" accept=".pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition">
-            
-            {% if op.contrato_proposta %}
-                <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-gray-200 text-xs mt-2 shadow-2xs">
-                    <span class="text-emerald-700 font-semibold flex items-center gap-1">✓ Arquivo existente: <span class="text-gray-500 font-normal truncate max-w-[240px]">{{ op.contrato_proposta.name }}</span></span> 
-                    <a href="{{ op.contrato_proposta.url }}" target="_blank" class="font-bold text-blue-600 hover:text-blue-800 underline">
-                        Visualizar PDF Atual ↗
-                    </a>
+                <div>
+                    <label class="nu-label">Título da Proposta / Oportunidade *</label>
+                    <input type="text" name="titulo" value="{{ op.titulo }}" required class="nu-input">
                 </div>
-            {% else %}
-                <p class="text-[11px] text-gray-400 mt-1">Nenhum documento anexado a esta oportunidade até o momento.</p>
-            {% endif %}
-        </div>
 
-        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-gray-500 space-y-1">
-            <p>👤 <strong>Responsável Comercial:</strong> {{ op.vendedor.get_full_name|default:op.vendedor.username }}</p>
-            <p>📅 <strong>Data de Criação:</strong> {{ op.data_criacao|date:"d/m/Y \à\s H:i" }}</p>
-            <p>🔄 <strong>Última Movimentação:</strong> {{ op.ultima_atualizacao|date:"d/m/Y \à\s H:i" }}</p>
-        </div>
+                <div>
+                    <label class="nu-label">Cliente Vinculado</label>
+                    <select class="nu-input" disabled style="cursor: not-allowed; opacity: 0.6;">
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" {% if cliente.id == op.cliente.id %}selected{% endif %}>
+                            {{ cliente.nome_fantasia }} ({{ cliente.cnpj_cpf }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="cliente" value="{{ op.cliente.id }}">
+                    <p style="font-size: 11px; color: #52525B; margin-top: 4px;">O cliente não pode ser alterado após a criação da oportunidade.</p>
+                </div>
 
-        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-            <a href="{% url 'painel_comercial' %}" 
-               class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition">
-                Cancelar
-            </a>
-            <button type="submit" 
-                    class="px-4 py-2 rounded-lg shadow-xs text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition">
-                Salvar Alterações
-            </button>
-        </div>
-    </form>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label class="nu-label">Valor Estimado (R$) *</label>
+                        <input type="text" id="valor_estimado_visivel" required placeholder="0,00" class="nu-input"
+                               style="color: #34D399; font-weight: 700;">
+                        <input type="hidden" name="valor_estimado" id="valor_estimado" value="{{ op.valor_estimado|stringformat:'.2f' }}">
+                    </div>
+
+                    <div>
+                        <label class="nu-label">Estágio no Funil</label>
+                        <select name="estagio" class="nu-input" style="cursor: pointer;">
+                            <option value="Prospecção" {% if op.estagio == 'Prospecção' %}selected{% endif %}>Prospecção</option>
+                            <option value="Qualificação" {% if op.estagio == 'Qualificação' %}selected{% endif %}>Qualificação</option>
+                            <option value="Proposta" {% if op.estagio == 'Proposta' %}selected{% endif %}>Proposta Enviada</option>
+                            <option value="Negociação" {% if op.estagio == 'Negociação' %}selected{% endif %}>Negociação</option>
+                            <option value="Em_Teste" {% if op.estagio == 'Em_Teste' %}selected{% endif %}>🔬 Em Teste / Validação</option>
+                            <option value="Fechado_Ganhou" {% if op.estagio == 'Fechado_Ganhou' %}selected{% endif %}>🏆 Fechado (Aprovado)</option>
+                            <option value="Fechado_Perdeu" {% if op.estagio == 'Fechado_Perdeu' %}selected{% endif %}>❌ Fechado (Perdeu)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="nu-label">Observações / Escopo do Projeto</label>
+                    <textarea name="descricao" rows="4" class="nu-input" placeholder="Descreva o escopo do projeto, necessidades do cliente ou anotações técnicas..." style="resize: vertical;">{{ op.descricao }}</textarea>
+                </div>
+
+                <div>
+                    <label class="nu-label">Contrato / Proposta (PDF)</label>
+                    <input type="file" name="contrato_proposta" accept=".pdf"
+                           style="width: 100%; font-size: 12px; color: #71717A; background: #1E1E28; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 14px; cursor: pointer;">
+                    {% if op.contrato_proposta %}
+                    <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                        <a href="{{ op.contrato_proposta.url }}" target="_blank"
+                           style="font-size: 12px; font-weight: 700; color: #34D399; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); padding: 5px 10px; border-radius: 7px;">
+                            📄 Arquivo atual: {{ op.contrato_proposta.name }} ↗
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);">
+                <a href="{% url 'painel_comercial' %}" class="btn-nu-outline" style="text-decoration: none;">Cancelar</a>
+                <button type="submit" class="btn-nu" style="border: none; cursor: pointer;">
+                    Salvar Alterações ✓
+                </button>
+            </div>
+        </form>
+    </div>
+
 </div>
 
+{% block extra_js %}
 <script>
-    const inputVisivel = document.getElementById('valor_estimado_visivel');
-    const inputOculto = document.getElementById('valor_estimado');
+    // Inicializa com o valor atual formatado em BRL
+    const valorHidden = document.getElementById('valor_estimado');
+    const valorVisivel = document.getElementById('valor_estimado_visivel');
 
-    function formatarMoeda(valor) {
-        return parseFloat(valor).toLocaleString('pt-BR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+    function formatarBRL(valor) {
+        let num = parseFloat(valor.replace(',', '.'));
+        if (isNaN(num)) return '';
+        return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Carregamento Seguro inicial da tela
-    window.addEventListener('DOMContentLoaded', () => {
-        if (inputOculto.value) {
-            // Substitui vírgula por ponto preventivamente caso o framework mude localização
-            let valorNormalizado = inputOculto.value.replace(',', '.');
-            const valorInicial = parseFloat(valorNormalizado);
-            if (!isNaN(valorInicial)) {
-                inputVisivel.value = formatarMoeda(valorInicial);
-            }
-        }
+    // Popula o campo visível ao carregar
+    if (valorHidden && valorHidden.value) {
+        valorVisivel.value = formatarBRL(valorHidden.value);
+    }
+
+    valorVisivel.addEventListener('input', function () {
+        // Remove tudo exceto dígitos e vírgula
+        const limpo = this.value.replace(/[^0-9,]/g, '');
+        valorHidden.value = limpo.replace(',', '.');
     });
 
-    // Escuta a digitação e aplica a máscara monetária ao vivo
-    inputVisivel.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, "");
-        if (value === "") {
-            inputVisivel.value = "";
-            inputOculto.value = "";
-            return;
-        }
-
-        let valorNumerico = (Number(value) / 100);
-        inputVisivel.value = formatarMoeda(valorNumerico);
-        inputOculto.value = valorNumerico.toFixed(2);
-    });
-
-    // Sanitização e garantia absoluta dos dados antes do envio do formulário
-    document.querySelector('form').addEventListener('submit', () => {
-        if (inputVisivel.value) {
-            let limpo = inputVisivel.value.replace(/\./g, "").replace(",", ".");
-            let convertido = parseFloat(limpo);
-            inputOculto.value = !isNaN(convertido) ? convertido.toFixed(2) : "0.00";
-        } else {
-            inputOculto.value = "0.00";
+    valorVisivel.addEventListener('blur', function () {
+        const valor = this.value.replace(/[^0-9,]/g, '').replace(',', '.');
+        const num = parseFloat(valor);
+        if (!isNaN(num)) {
+            this.value = formatarBRL(num.toString());
+            valorHidden.value = num.toFixed(2);
         }
     });
 </script>
+{% endblock %}
 {% endblock %}

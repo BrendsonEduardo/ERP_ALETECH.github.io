@@ -3,84 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALETECH - Novo Chamado</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Novo Chamado — AleTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; color: #25D366 !important; }
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        body { background: #09090B; color: #E4E4F0; margin: 0; min-height: 100vh; }
+        .nu-input { background: #1E1E28; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; color: #E4E4F0; padding: 11px 14px; font-size: 14px; transition: all 0.2s; outline: none; width: 100%; }
+        .nu-input:focus { border-color: rgba(138,5,190,0.6); box-shadow: 0 0 0 3px rgba(138,5,190,0.15); }
+        .nu-input::placeholder { color: #52525B; }
+        .nu-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 6px; }
+        select.nu-input option { background: #18181F; }
+        textarea.nu-input { resize: vertical; }
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container-fluid px-4">
-            <span class="navbar-brand">SUPORTE TÉCNICO - ALETECH</span>
-            <div class="d-flex align-items-center gap-3">
-                <a href="{% url 'painel_helpdesk' %}" class="btn btn-outline-light btn-sm">⬅️ Voltar ao Painel</a>
-                <span class="text-light fs-6">2026</span>
-            </div>
-        </div>
-    </nav>
+    {% include "partials/sidebar.html" %}
 
-    <div class="container mb-5" style="max-width: 800px;">
-        <div class="card shadow-sm p-4 bg-white rounded border-0">
-            <h2 class="mb-4 fw-bold text-secondary">Abertura de Chamado</h2>
-            
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px;">
+
+        <!-- Back + Title -->
+        <div style="margin-bottom: 28px;">
+            <a href="{% url 'painel_helpdesk' %}"
+               style="font-size: 12px; font-weight: 600; color: #71717A; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; transition: color 0.15s;"
+               onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#71717A'">← Voltar ao Painel</a>
+            <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Abrir Novo Chamado</h1>
+            <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Preencha os dados conforme diretriz POP-001</p>
+        </div>
+
+        <!-- Form -->
+        <div style="max-width: 720px; background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 32px;">
             <form action="{% url 'novo_chamado' %}" method="POST">
                 {% csrf_token %}
-                
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Empresa / Cliente:</label>
-                        <input type="text" name="empresa" class="form-control" placeholder="Nome da empresa parceira" required>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+
+                    <div>
+                        <label class="nu-label">Empresa / Cliente *</label>
+                        <input type="text" name="empresa" class="nu-input" placeholder="Nome da empresa parceira" required>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Solicitante:</label>
-                        <input type="text" name="solicitante" class="form-control" placeholder="Quem está pedindo o suporte?" required>
+                    <div>
+                        <label class="nu-label">Solicitante *</label>
+                        <input type="text" name="solicitante" class="nu-input" placeholder="Quem está pedindo o suporte?" required>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Contato (WhatsApp/Telefone):</label>
-                        <input type="text" name="contato" class="form-control" placeholder="(00) 00000-0000" required>
+                    <div>
+                        <label class="nu-label">Contato (WhatsApp / Telefone) *</label>
+                        <input type="text" name="contato" class="nu-input" placeholder="(00) 00000-0000" required>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Forma de Atendimento:</label>
-                        <select name="forma_atendimento" class="form-select">
-                            <option value="Presencial" selected>🚗 Presencial</option>
+                    <div>
+                        <label class="nu-label">Forma de Atendimento</label>
+                        <select name="forma_atendimento" class="nu-input" style="cursor: pointer;">
+                            <option value="Presencial">🚗 Presencial</option>
                             <option value="Remoto">💻 Remoto</option>
                         </select>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Equipamento / Ativo:</label>
-                        <input type="text" name="equipamento" class="form-control" placeholder="Ex: Servidor, Notebook Dell, Impressora HP" required>
+                    <div>
+                        <label class="nu-label">Equipamento / Ativo *</label>
+                        <input type="text" name="equipamento" class="nu-input" placeholder="Ex: Servidor, Notebook Dell" required>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Grau de Prioridade:</label>
-                        <select name="prioridade" class="form-select" required>
+                    <div>
+                        <label class="nu-label">Grau de Prioridade</label>
+                        <select name="prioridade" class="nu-input" required style="cursor: pointer;">
                             <option value="Baixa">🟢 Baixa</option>
                             <option value="Média" selected>🟡 Média</option>
                             <option value="Alta">🔴 Alta</option>
                         </select>
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label fw-bold">Descrição do Problema:</label>
-                        <textarea name="problema" rows="4" class="form-control" placeholder="Detalhe o erro ou solicitação com o máximo de informações possível conforme diretriz do POP-001..." required></textarea>
+                    <div style="grid-column: 1 / -1;">
+                        <label class="nu-label">Descrição do Problema *</label>
+                        <textarea name="problema" rows="4" class="nu-input" required
+                                  placeholder="Detalhe o erro ou solicitação com o máximo de informações possível conforme POP-001..."></textarea>
                     </div>
+
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{% url 'painel_helpdesk' %}" class="btn btn-secondary px-4">Cancelar</a>
-                    <button type="submit" class="btn btn-success px-4 fw-bold">Abrir Chamado 🚀</button>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <a href="{% url 'painel_helpdesk' %}"
+                       style="padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); text-decoration: none;">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            style="padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 800; color: white; background: linear-gradient(135deg, #8A05BE, #6B03A0); border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.2s;"
+                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(138,5,190,0.45)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(138,5,190,0.3)'">
+                        Abrir Chamado 🚀
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('app-sidebar').classList.toggle('-translate-x-full'); }
+    </script>
 </body>
 </html>

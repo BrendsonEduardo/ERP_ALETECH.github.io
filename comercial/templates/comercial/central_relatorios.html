@@ -1,119 +1,104 @@
 {% extends 'base.html' %}
+{% block title %}Central de Relatórios — AleTech ERP{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-6 py-8 text-gray-200 min-h-screen">
-    
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 border-b border-gray-800 pb-6">
+<div style="display: flex; flex-direction: column; gap: 24px;">
+
+    <!-- Page Header -->
+    <div class="page-header">
         <div>
-            <h1 class="text-3xl font-bold text-slate-900 tracking-wide">📈 Central de Relatórios</h1>
-            <p class="text-sm text-gray-500 mt-1">Consulte os indicadores comerciais e emita relatórios customizados.</p>
+            <h1 class="page-title">Central de Relatórios</h1>
+            <p class="page-subtitle">Indicadores comerciais customizados por período</p>
         </div>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
-        <form method="GET" action="{% url 'central_relatorios' %}" class="flex flex-col lg:flex-row items-end gap-4">
-            
-            <div class="w-full lg:w-1/4">
-                <label for="tipo_relatorio" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo de Relatório</label>
-                <select id="tipo_relatorio" name="tipo_relatorio" 
-                        class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                    <option value="geral" {% if request.GET.tipo_relatorio == 'geral' or not request.GET.tipo_relatorio %}selected{% endif %}>📊 Visão Geral Comercial</option>
-                    <option value="vendedores" {% if request.GET.tipo_relatorio == 'vendedores' %}selected{% endif %}>💼 Desempenho por Vendedor</option>
-                    <option value="clientes" {% if request.GET.tipo_relatorio == 'clientes' %}selected{% endif %}>👥 Novos Clientes Cadastrados</option>
-                    <option value="faturamento" {% if request.GET.tipo_relatorio == 'faturamento' %}selected{% endif %}>💰 Faturamento e Conversões</option>
+    <!-- Filter card -->
+    <div class="glass-card" style="padding: 24px;">
+        <form method="GET" action="{% url 'central_relatorios' %}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+
+            <div style="flex: 1; min-width: 180px;">
+                <label class="nu-label">Tipo de Relatório</label>
+                <select name="tipo_relatorio" class="nu-input" style="cursor: pointer;">
+                    <option value="geral" {% if tipo_relatorio == 'geral' %}selected{% endif %}>Visão Geral Comercial</option>
+                    <option value="vendedores" {% if tipo_relatorio == 'vendedores' %}selected{% endif %}>Desempenho por Vendedor</option>
+                    <option value="clientes" {% if tipo_relatorio == 'clientes' %}selected{% endif %}>Novos Clientes Cadastrados</option>
+                    <option value="faturamento" {% if tipo_relatorio == 'faturamento' %}selected{% endif %}>Faturamento e Conversões</option>
                 </select>
             </div>
 
-            <div class="w-full md:w-1/2 lg:w-1/4">
-                <label for="data_inicio" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data Inicial</label>
-                <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio }}" 
-                       class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-            
-            <div class="w-full md:w-1/2 lg:w-1/4">
-                <label for="data_fim" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data Final</label>
-                <input type="date" id="data_fim" name="data_fim" value="{{ data_fim }}" 
-                       class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-blue-500 transition-colors">
+            <div style="flex: 1; min-width: 140px;">
+                <label class="nu-label">Data Inicial</label>
+                <input type="date" name="data_inicio" value="{{ data_inicio }}" class="nu-input">
             </div>
 
-            <div class="w-full lg:w-1/4 flex gap-2">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 shadow-md cursor-pointer">
-                    <span>🔍</span> <span>Filtrar</span>
-                </button>
-                
-                <a href="#" 
-                   id="btn-imprimir"
-                   target="_blank" 
-                   class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 shadow-md text-center cursor-pointer">
-                    <span>🖨️</span> <span>Imprimir</span>
+            <div style="flex: 1; min-width: 140px;">
+                <label class="nu-label">Data Final</label>
+                <input type="date" name="data_fim" value="{{ data_fim }}" class="nu-input">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                <button type="submit" class="btn-nu">Filtrar</button>
+                <a href="{% url 'exportar_relatorio_clientes' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}&tipo_relatorio={{ tipo_relatorio }}"
+                   target="_blank" class="btn-nu-outline" style="text-decoration: none; white-space: nowrap;">
+                    🖨️ Imprimir
                 </a>
             </div>
         </form>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
-            <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Novos Clientes</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_clientes|default:"0" }}</p>
-            <p class="text-xs text-gray-500 mt-1">Cadastrados no período</p>
+    <!-- KPIs -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+
+        <div class="stat-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B;">Novos Clientes</span>
+                <span style="font-size: 18px;">👥</span>
+            </div>
+            <p style="font-size: 34px; font-weight: 900; color: #FAFAFA; margin: 0; letter-spacing: -1px; line-height: 1;">{{ total_clientes|default:"0" }}</p>
+            <p style="font-size: 11px; color: #52525B; margin-top: 6px;">cadastrados no período</p>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
-            <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Propostas em Aberto</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ propostas_abertas|default:"0" }}</p>
-            <p class="text-xs text-gray-500 mt-1">Negociações ativas no funil</p>
+        <div class="stat-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B;">Propostas Abertas</span>
+                <span style="font-size: 18px;">📋</span>
+            </div>
+            <p style="font-size: 34px; font-weight: 900; color: #FCD34D; margin: 0; letter-spacing: -1px; line-height: 1;">{{ propostas_abertas }}</p>
+            <p style="font-size: 11px; color: #52525B; margin-top: 6px;">em andamento</p>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
-            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Conversões (Ganhas)</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ propostas_ganhas|default:"0" }}</p>
-            <p class="text-xs text-gray-500 mt-1">Contratos fechados</p>
+        <div class="stat-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B;">Contratos Ganhos</span>
+                <span style="font-size: 18px;">🏆</span>
+            </div>
+            <p style="font-size: 34px; font-weight: 900; color: #34D399; margin: 0; letter-spacing: -1px; line-height: 1;">{{ propostas_ganhas }}</p>
+            <p style="font-size: 11px; color: #52525B; margin-top: 6px;">fechados com sucesso</p>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:border-gray-300 transition-all">
-            <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Valor Convertido</p>
-            <p class="text-3xl font-bold text-emerald-600 mt-2">R$ {{ receita_total|default:"0,00" }}</p>
-            <p class="text-xs text-gray-500 mt-1">Faturamento gerado no período</p>
+        <div class="stat-card" style="padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B;">Receita Total</span>
+                <span style="font-size: 18px;">💰</span>
+            </div>
+            <p style="font-size: 22px; font-weight: 900; color: #34D399; margin: 0; letter-spacing: -0.5px; line-height: 1;">R$&nbsp;{{ receita_total|floatformat:2 }}</p>
+            <p style="font-size: 11px; color: #52525B; margin-top: 6px;">ganhos no período</p>
         </div>
+
     </div>
 
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 flex items-start space-x-3">
-        <span class="text-xl text-blue-500 mt-0.5">ℹ️</span>
-        <div>
-            <h4 class="text-sm font-semibold text-blue-800">Dica do Sistema</h4>
-            <p class="text-xs text-blue-950 mt-0.5">
-                Os dados acima refletem estritamente o intervalo selecionado. Para gerar um arquivo impresso em PDF limpo, formatado sem os menus do sistema e ideal para reuniões, clique no botão <strong class="text-emerald-600">"Imprimir"</strong>.
-            </p>
-        </div>
+    <!-- Empty state / Info -->
+    <div class="glass-card" style="padding: 40px; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 16px;">📊</div>
+        <h3 style="font-size: 16px; font-weight: 700; color: #FAFAFA; margin: 0 0 8px;">Relatório: {{ tipo_relatorio|title }}</h3>
+        <p style="font-size: 13px; color: #71717A; margin: 0 0 20px;">
+            Período: <strong style="color: #A1A1AA;">{{ data_inicio }}</strong> até <strong style="color: #A1A1AA;">{{ data_fim }}</strong>
+        </p>
+        <a href="{% url 'exportar_relatorio_clientes' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}&tipo_relatorio={{ tipo_relatorio }}"
+           target="_blank" class="btn-nu" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            🖨️ Gerar Relatório para Impressão
+        </a>
     </div>
 
 </div>
-
-<script>
-    const selectTipo = document.getElementById('tipo_relatorio');
-    const inputInicio = document.getElementById('data_inicio');
-    const inputFim = document.getElementById('data_fim');
-    const btnImprimir = document.getElementById('btn-imprimir');
-
-    function atualizarLinkImpressao() {
-        const tipo = selectTipo.value;
-        const inicio = inputInicio.value;
-        const fim = inputFim.value;
-        
-        // Atualiza a URL do link com os valores exatos da tela em tempo real
-        btnImprimir.href = `{% url 'exportar_relatorio_clientes' %}?tipo_relatorio=${tipo}&data_inicio=${inicio}&data_fim=${fim}`;
-    }
-
-    // Escuta qualquer mudança nos inputs do formulário
-    selectTipo.addEventListener('change', atualizarLinkImpressao);
-    inputInicio.addEventListener('change', atualizarLinkImpressao);
-    inputFim.addEventListener('change', atualizarLinkImpressao);
-
-    // Executa uma vez ao carregar a página para manter o estado atualizado
-    window.addEventListener('DOMContentLoaded', atualizarLinkImpressao);
-</script>
 {% endblock %}

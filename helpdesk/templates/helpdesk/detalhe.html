@@ -1,112 +1,245 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chamado #{{ chamado.id }} - ERP AleTech</title>
+    <title>Chamado #{{ chamado.id }} — AleTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</head>
-<body class="bg-gray-100 font-sans">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
 
-    <div class="max-w-4xl mx-auto py-10 px-4">
-        <div class="flex justify-between items-center mb-6">
-            <a href="{% url 'painel_helpdesk' %}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition">
-                ← Voltar para o Painel
-            </a>
-            <span class="text-sm text-gray-500">ID do Chamado: #{{ chamado.id }}</span>
+        body {
+            background: #09090B;
+            color: #E4E4F0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .nu-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #52525B;
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .s-aberto {
+            background: rgba(244, 114, 182, 0.12);
+            color: #F472B6;
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .s-atendimento {
+            background: rgba(251, 191, 36, 0.12);
+            color: #FCD34D;
+            border: 1px solid rgba(252, 211, 77, 0.2);
+        }
+
+        .s-usuario {
+            background: rgba(96, 165, 250, 0.12);
+            color: #60A5FA;
+            border: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .s-terceiros {
+            background: rgba(167, 139, 250, 0.12);
+            color: #A78BFA;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .s-resolvido {
+            background: rgba(52, 211, 153, 0.12);
+            color: #34D399;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .s-encerrado {
+            background: rgba(255, 255, 255, 0.06);
+            color: #52525B;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        @media (max-width: 1023px) {
+            #app-sidebar {
+                transform: translateX(-100%);
+            }
+
+            #main-content {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include "partials/sidebar.html" %}
+
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px;">
+
+        <!-- Back + ID -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{% url 'painel_helpdesk' %}"
+                style="font-size: 12px; font-weight: 600; color: #71717A; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#71717A'">← Voltar ao Painel</a>
+            <span
+                style="font-size: 11px; font-weight: 600; color: #52525B; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); padding: 4px 12px; border-radius: 99px;">Chamado
+                #{{ chamado.id }}</span>
         </div>
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-white">Ficha de Atendimento</h1>
-                
-                <div>
-                    {% if chamado.status == 'Aberto' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">🔴 Aberto</span>
-                    {% elif chamado.status == 'Em Atendimento' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">🟡 Em Atendimento</span>
-                    {% elif chamado.status == 'Aguardando Usuário' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-sky-100 text-sky-800">🔵 Aguardando Usuário</span>
-                    {% elif chamado.status == 'Aguardando Terceiros' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">🟣 Aguardando Terceiros</span>
-                    {% elif chamado.status == 'Resolvido' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">🟢 Resolvido</span>
-                    {% elif chamado.status == 'Encerrado' %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-300 text-gray-800">🔒 Encerrado</span>
-                    {% else %}
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">{{ chamado.status }}</span>
-                    {% endif %}
-                </div>
+        <!-- Card -->
+        <div
+            style="max-width: 760px; background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden;">
+
+            <!-- Header -->
+            <div
+                style="padding: 24px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; background: rgba(138,5,190,0.05);">
+                <h1 style="font-size: 17px; font-weight: 800; color: #FAFAFA; margin: 0;">Ficha de Atendimento</h1>
+                {% if chamado.status == 'Aberto' %}
+                <span class="status-badge s-aberto">🔴 Aberto</span>
+                {% elif chamado.status == 'Em Atendimento' %}
+                <span class="status-badge s-atendimento">🟡 Em Atendimento</span>
+                {% elif chamado.status == 'Aguardando Usuário' %}
+                <span class="status-badge s-usuario">🔵 Ag. Usuário</span>
+                {% elif chamado.status == 'Aguardando Terceiros' %}
+                <span class="status-badge s-terceiros">🟣 Ag. Terceiros</span>
+                {% elif chamado.status == 'Resolvido' %}
+                <span class="status-badge s-resolvido">🟢 Resolvido</span>
+                {% elif chamado.status == 'Encerrado' %}
+                <span class="status-badge s-encerrado">🔒 Encerrado</span>
+                {% else %}
+                <span class="status-badge s-encerrado">{{ chamado.status }}</span>
+                {% endif %}
             </div>
 
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-gray-200">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Empresa</label>
-                    <p class="mt-1 text-base font-semibold text-gray-900">{{ chamado.empresa }}</p>
+            <!-- Info Grid -->
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+
+                {% for label, value in forloop.counter|yieldnoop %}{% endfor %}
+
+                <div
+                    style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04);">
+                    <span class="nu-label">Empresa</span>
+                    <p style="font-size: 15px; font-weight: 700; color: #FAFAFA; margin: 4px 0 0;">{{ chamado.empresa }}
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Solicitante / Contato</label>
-                    <p class="mt-1 text-base font-semibold text-gray-900">{{ chamado.solicitante }} <span class="text-sm font-normal text-gray-500">({{ chamado.contato|default:"Não informado" }})</span></p>
+
+                <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span class="nu-label">Solicitante / Contato</span>
+                    <p style="font-size: 14px; font-weight: 600; color: #E4E4F0; margin: 4px 0 0;">
+                        {{ chamado.solicitante }}
+                        <span style="font-size: 12px; color: #71717A; font-weight: 400;">&nbsp;({{
+                            chamado.contato|default:"Não informado" }})</span>
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Data de Abertura</label>
-                    <p class="mt-1 text-base text-gray-700">{{ chamado.data_hora|date:"d/m/Y H:i" }}</p>
+
+                <div
+                    style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04);">
+                    <span class="nu-label">Data de Abertura</span>
+                    <p style="font-size: 13px; color: #A1A1AA; margin: 4px 0 0;">{{ chamado.data_hora|date:"d/m/Y H:i"
+                        }}</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Forma de Atendimento</label>
-                    <p class="mt-1 text-base text-gray-700">{{ chamado.forma_atendimento }}</p>
+
+                <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span class="nu-label">Forma de Atendimento</span>
+                    <p style="font-size: 13px; color: #A1A1AA; margin: 4px 0 0;">{{ chamado.forma_atendimento }}</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Equipamento / Ativo</label>
-                    <p class="mt-1 text-base text-gray-700">{{ chamado.equipamento }}</p>
+
+                <div style="padding: 18px 24px; border-right: 1px solid rgba(255,255,255,0.04);">
+                    <span class="nu-label">Equipamento / Ativo</span>
+                    <p style="font-size: 13px; font-weight: 600; color: #E4E4F0; margin: 4px 0 0;">{{
+                        chamado.equipamento }}</p>
                 </div>
-                
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Grau de Prioridade</label>
-                    <div class="mt-1">
+
+                <div style="padding: 18px 24px;">
+                    <span class="nu-label">Grau de Prioridade</span>
+                    <div style="margin-top: 6px;">
                         {% if chamado.prioridade == 'Alta' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">Alta Urgência</span>
+                        <span
+                            style="display: inline-flex; align-items: center; gap: 4px; background: rgba(244,114,182,0.12); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;">🔴
+                            Alta</span>
                         {% elif chamado.prioridade == 'Média' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">Média</span>
+                        <span
+                            style="display: inline-flex; align-items: center; gap: 4px; background: rgba(251,191,36,0.12); color: #FCD34D; border: 1px solid rgba(252,211,77,0.2); padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;">🟡
+                            Média</span>
                         {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800">Baixa</span>
+                        <span
+                            style="display: inline-flex; align-items: center; gap: 4px; background: rgba(52,211,153,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.2); padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;">🟢
+                            Baixa</span>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider">Técnico Responsável</label>
-                    <p class="mt-1 text-base text-gray-700 font-medium text-blue-600">
+            </div>
+
+            <!-- Técnico -->
+            <div
+                style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="width: 36px; height: 36px; border-radius: 50%; background: rgba(138,5,190,0.2); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #C084F5; flex-shrink: 0;">
+                    {{ chamado.nome_tecnico|slice:":1"|upper|default:"?" }}
+                </div>
+                <div>
+                    <span class="nu-label" style="margin-bottom: 2px;">Técnico Responsável</span>
+                    <p style="font-size: 13px; font-weight: 700; color: #C084F5; margin: 0;">
                         {{ chamado.nome_tecnico|default:"Não atribuído" }}
-                        
                         {% if chamado.tecnico and chamado.tecnico.cargo %}
-                            <span class="ml-1.5 px-2 py-0.5 text-xs font-normal rounded bg-gray-100 text-gray-600 border border-gray-200">
-                                {{ chamado.tecnico.get_cargo_display }}
-                            </span>
+                        <span style="font-size: 11px; font-weight: 500; color: #71717A; margin-left: 6px;">({{
+                            chamado.tecnico.get_cargo_display }})</span>
                         {% endif %}
                     </p>
                 </div>
             </div>
 
-            <div class="p-6 border-b border-gray-200 bg-gray-50">
-                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Problema Apresentado</label>
-                <div class="text-base text-gray-800 whitespace-pre-line bg-white p-4 rounded border border-gray-200 shadow-sm">
+            <!-- Problema -->
+            <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <span class="nu-label">Problema Apresentado</span>
+                <div
+                    style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px; margin-top: 8px; font-size: 13px; color: #A1A1AA; white-space: pre-line; line-height: 1.6;">
                     {{ chamado.problema }}
                 </div>
             </div>
 
-            <div class="p-6">
-                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Último Comentário / Ações Realizadas</label>
+            <!-- Último Comentário -->
+            <div style="padding: 20px 24px;">
+                <span class="nu-label">Último Comentário / Ações Realizadas</span>
                 {% if chamado.ultimo_comentario %}
-                    <div class="text-base text-gray-800 whitespace-pre-line bg-blue-50 p-4 rounded border border-blue-200">
-                        {{ chamado.ultimo_comentario }}
-                    </div>
+                <div
+                    style="background: rgba(138,5,190,0.07); border: 1px solid rgba(138,5,190,0.2); border-radius: 10px; padding: 14px; margin-top: 8px; font-size: 13px; color: #C084F5; white-space: pre-line; line-height: 1.6;">
+                    {{ chamado.ultimo_comentario }}
+                </div>
                 {% else %}
-                    <p class="text-sm italic text-gray-500">Nenhum registro de ação técnica ou justificativa inserido até o momento.</p>
+                <p style="font-size: 12px; color: #3F3F46; font-style: italic; margin-top: 8px;">Nenhum registro técnico
+                    inserido até o momento.</p>
                 {% endif %}
             </div>
+
         </div>
+
     </div>
 
+    <script>
+        function toggleSidebar() { document.getElementById('app-sidebar').classList.toggle('-translate-x-full'); }
+    </script>
 </body>
+
 </html>

@@ -1,95 +1,248 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ERP AleTech (Edição Copa do Mundo)</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Entrar — ERP AleTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* TEMA COPA: Fundo claro com um sutil degradê nos tons da seleção */
-        body { 
-            background: linear-gradient(135deg, #f3f4f6 0%, #e8f5e9 100%); 
-            color: #1f2937; 
-            min-height: 100vh;
-        }
-        
-        /* TEMA COPA: Card branco com uma borda superior verde e amarela */
-        .card-login { 
-            max-width: 400px; 
-            width: 100%; 
-            background-color: #ffffff; 
-            border: none !important;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Detalhe da bandeira no topo do card */
-        .card-login::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(to right, #009c3b 40%, #ffdf00 40%, #ffdf00 60%, #002776 60%);
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
         }
 
-        .logo-login { max-width: 200px; height: auto; }
-        
-        /* Inputs com foco na cor Verde Brasil */
-        .form-control { background-color: #ffffff; border-color: #cbd5e1; color: #1f2937; }
-        .form-control:focus { background-color: #ffffff; border-color: #009c3b; color: #1f2937; box-shadow: 0 0 0 0.25rem rgba(0, 156, 59, 0.15); }
-        .form-control::placeholder { color: #94a3b8; }
-        
-        /* TEMA COPA: Botão Amarelo Canarinho com texto Azul focado na legibilidade */
-        .btn-copa { 
-            background-color: #ffdf00; 
-            color: #002776; 
-            border: 2px solid #ffdf00;
+        body {
+            margin: 0;
+            background: #09090B;
+            color: #E4E4F0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .login-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: #8A05BE;
+            top: -150px;
+            left: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: #5B0080;
+            bottom: -100px;
+            right: -50px;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: #C084F5;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: float 6s ease-in-out infinite 2s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-20px) scale(1.05);
+            }
+        }
+
+        .login-card {
+            background: rgba(24, 24, 31, 0.85);
+            border: 1px solid rgba(138, 5, 190, 0.25);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(138, 5, 190, 0.1) inset;
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-mark {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #8A05BE 0%, #5B0080 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(138, 5, 190, 0.4);
+            margin-bottom: 24px;
+        }
+
+        .nu-input {
+            width: 100%;
+            background: rgba(30, 30, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #E4E4F0;
+            padding: 13px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .nu-input:focus {
+            border-color: rgba(138, 5, 190, 0.6);
+            box-shadow: 0 0 0 3px rgba(138, 5, 190, 0.15);
+        }
+
+        .nu-input::placeholder {
+            color: #52525B;
+        }
+
+        .nu-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #71717A;
+            margin-bottom: 7px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8A05BE 0%, #6B03A0 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
             font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(138, 5, 190, 0.35);
+            letter-spacing: 0.02em;
         }
-        .btn-copa:hover { 
-            background-color: #e6c800; 
-            color: #001a50;
-            border-color: #e6c800;
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, #9B06D3 0%, #7A04B5 100%);
+            box-shadow: 0 8px 30px rgba(138, 5, 190, 0.5);
+            transform: translateY(-1px);
         }
-        
-        .text-custom-muted { color: #475569 !important; font-weight: 500; }
-        .text-verde-brasil { color: #009c3b; font-weight: 700; }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-alert {
+            background: rgba(244, 114, 182, 0.1);
+            border: 1px solid rgba(244, 114, 182, 0.25);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 13px;
+            color: #F472B6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: slideUp 0.4s ease;
+        }
     </style>
 </head>
-<body class="d-flex align-items-center justify-content-center">
 
-    <div class="card card-login shadow-xl rounded-4 p-4">
-        <div class="text-center mb-4 mt-2">
-            <img src="{% static 'helpdesk/aletechlgo.webp' %}" alt="ALETECH" class="logo-login img-fluid mb-2">
-            <div>
-                <span class="text-custom-muted small">🏆 Rumo ao Hexa no <span class="text-verde-brasil">ERP AleTech</span></span>
-            </div>
-        </div>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-danger bg-danger-subtle text-danger border-0 p-2 small text-center" role="alert">
-                    ⚠️ {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="POST" class="m-0 p-0">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="id_username" class="form-label small fw-bold text-secondary">Usuário</label>
-                <input type="text" name="username" id="id_username" class="form-control" placeholder="Seu usuário" required>
-            </div>
-            <div class="mb-4">
-                <label for="id_password" class="form-label small fw-bold text-secondary">Senha</label>
-                <input type="password" name="password" id="id_password" class="form-control" placeholder="Sua senha" required>
-            </div>
-            <button type="submit" class="btn btn-copa w-100 py-2 transition-all">Entrar no Sistema 🇧🇷</button>
-        </form>
+<body>
+    <div class="login-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
 
+    <div
+        style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; position: relative; z-index: 1;">
+        <div class="login-card">
+
+            <div class="logo-mark">A</div>
+
+            <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0 0 4px;">
+                Bom dia 👋
+            </h1>
+            <p style="font-size: 14px; color: #71717A; margin: 0 0 32px; font-weight: 400;">
+                Entre com suas credenciais para acessar o ERP.
+            </p>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="error-alert">
+                <span>⚠</span>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div style="margin-bottom: 18px;">
+                    <label class="nu-label" for="id_username">Usuário</label>
+                    <input type="text" name="username" id="id_username" class="nu-input"
+                        placeholder="Seu usuário de acesso" required autocomplete="username">
+                </div>
+                <div style="margin-bottom: 28px;">
+                    <label class="nu-label" for="id_password">Senha</label>
+                    <input type="password" name="password" id="id_password" class="nu-input" placeholder="••••••••"
+                        required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-login">Entrar no sistema →</button>
+            </form>
+
+            <p style="text-align: center; font-size: 11px; color: #3F3F46; margin-top: 24px; font-weight: 500;">
+                ERP AleTech · Acesso Restrito
+            </p>
+        </div>
+    </div>
 </body>
+
 </html>

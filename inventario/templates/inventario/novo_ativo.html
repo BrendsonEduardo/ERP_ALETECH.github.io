@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} — AleTech ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root {
+            --surface-0: #09090B; --surface-1: #111117; --surface-2: #18181F;
+            --surface-3: #1E1E28; --border: rgba(255,255,255,0.07);
+        }
+        body { background: var(--surface-0); color: #E4E4F0; margin: 0; min-height: 100vh; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+
+        /* Labels dos campos do form */
+        .field-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 6px; }
+
+        /* Mensagens de erro */
+        .field-error { font-size: 11px; color: #F472B6; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+
+        /* Botão principal */
+        .btn-nu { background: linear-gradient(135deg, #8A05BE, #6B03A0); color: white; font-weight: 700; border-radius: 10px; padding: 10px 20px; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-nu:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(138,5,190,0.45); }
+
+        /* Seção de alocação (visível condicionalmente via JS) */
+        #secao-alocacao { transition: opacity 0.25s, max-height 0.35s ease; overflow: hidden; }
+
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
+    </style>
+</head>
+<body>
+
+    {% include "partials/sidebar.html" %}
+
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px; transition: margin 0.3s;">
+
+        <!-- Breadcrumb / Header -->
+        <div style="margin-bottom: 28px;">
+            <a href="{% url 'inventario:lista_ativos' %}"
+               style="font-size: 12px; color: #52525B; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; transition: color 0.15s;"
+               onmouseover="this.style.color='#A855F7'" onmouseout="this.style.color='#52525B'">
+                ← Voltar ao Inventário
+            </a>
+            <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">{{ titulo }}</h1>
+            <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Preencha os dados do ativo físico abaixo</p>
+        </div>
+
+        <!-- Card do formulário -->
+        <div style="max-width: 860px;">
+            <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 32px;">
+
+                {% if form.non_field_errors %}
+                <div style="background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.25); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #F472B6; margin-bottom: 24px;">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <!-- ── Seção 1: Identificação ────────────────────────────── -->
+                    <div style="margin-bottom: 28px;">
+                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #52525B; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                            🖥️ Identificação do Equipamento
+                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+
+                            <!-- Modelo do Equipamento (largura total) -->
+                            <div style="grid-column: 1 / -1;">
+                                <label class="field-label" for="{{ form.modelo_equipamento.id_for_label }}">
+                                    {{ form.modelo_equipamento.label }} <span style="color: #F472B6;">*</span>
+                                </label>
+                                {{ form.modelo_equipamento }}
+                                {% if form.modelo_equipamento.errors %}
+                                <p class="field-error">⚠ {{ form.modelo_equipamento.errors|join:", " }}</p>
+                                {% endif %}
+                                <p style="font-size: 11px; color: #3F3F46; margin-top: 5px;">
+                                    Não encontrou o modelo?
+                                    <a href="{% url 'inventario:cadastrar_modelo' %}" style="color: #A855F7; text-decoration: none;" target="_blank">Cadastrar novo modelo →</a>
+                                </p>
+                            </div>
+
+                            <!-- Toggle: Controla Serial -->
+                            <div style="grid-column: 1 / -1;">
+                                <div style="display: flex; align-items: center; gap: 12px; background: rgba(138,5,190,0.08); border: 1px solid rgba(138,5,190,0.2); border-radius: 12px; padding: 12px 16px;">
+                                    {{ form.controla_serial }}
+                                    <label for="{{ form.controla_serial.id_for_label }}" style="font-size: 13px; font-weight: 600; color: #C084F5; cursor: pointer;">
+                                        {{ form.controla_serial.label }}
+                                    </label>
+                                    <span style="font-size: 11px; color: #71717A; margin-left: 4px;">{{ form.controla_serial.help_text }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Número de Série (visível quando controla_serial=True) -->
+                            <div id="div-numero-serie">
+                                <label class="field-label" for="{{ form.numero_serie.id_for_label }}">
+                                    {{ form.numero_serie.label }} <span id="label-req-serial" style="color: #F472B6;">*</span>
+                                </label>
+                                {{ form.numero_serie }}
+                                {% if form.numero_serie.errors %}
+                                <p class="field-error">⚠ {{ form.numero_serie.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Quantidade em Estoque (visível quando controla_serial=False) -->
+                            <div id="div-quantidade-estoque" style="display: none;">
+                                <label class="field-label" for="{{ form.quantidade_estoque.id_for_label }}">
+                                    {{ form.quantidade_estoque.label }} <span style="color: #F472B6;">*</span>
+                                </label>
+                                {{ form.quantidade_estoque }}
+                                {% if form.quantidade_estoque.errors %}
+                                <p class="field-error">⚠ {{ form.quantidade_estoque.errors|join:", " }}</p>
+                                {% endif %}
+                                <p style="font-size: 11px; color: #3F3F46; margin-top: 5px;">{{ form.quantidade_estoque.help_text }}</p>
+                            </div>
+
+                            <!-- Status Operacional -->
+                            <div>
+                                <label class="field-label" for="{{ form.status.id_for_label }}">
+                                    {{ form.status.label }} <span style="color: #F472B6;">*</span>
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                <p class="field-error">⚠ {{ form.status.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ── Seção 2: Dados de Alocação (visível condicionalmente) ── -->
+                    <div id="secao-alocacao" style="margin-bottom: 28px; max-height: 0px; opacity: 0;">
+                        <div style="background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.15); border-radius: 14px; padding: 20px;">
+                            <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #34D399; margin: 0 0 16px;">
+                                📍 Dados de Alocação
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+
+                                <!-- Cliente Atual (largura total) -->
+                                <div style="grid-column: 1 / -1;">
+                                    <label class="field-label" for="{{ form.cliente_atual.id_for_label }}">
+                                        {{ form.cliente_atual.label }}
+                                        <span id="label-req-cliente" style="color: #F472B6; display: none;">*</span>
+                                    </label>
+                                    {{ form.cliente_atual }}
+                                    {% if form.cliente_atual.errors %}
+                                    <p class="field-error">⚠ {{ form.cliente_atual.errors|join:", " }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Unidade -->
+                                <div>
+                                    <label class="field-label" for="{{ form.unidade.id_for_label }}">{{ form.unidade.label }}</label>
+                                    {{ form.unidade }}
+                                    {% if form.unidade.errors %}
+                                    <p class="field-error">⚠ {{ form.unidade.errors|join:", " }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Setor -->
+                                <div>
+                                    <label class="field-label" for="{{ form.setor.id_for_label }}">{{ form.setor.label }}</label>
+                                    {{ form.setor }}
+                                    {% if form.setor.errors %}
+                                    <p class="field-error">⚠ {{ form.setor.errors|join:", " }}</p>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Seção 3: Observações ──────────────────────────────── -->
+                    <div style="margin-bottom: 32px;">
+                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #52525B; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                            📝 Observações
+                        </p>
+                        <div>
+                            <label class="field-label" for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                            <p class="field-error">⚠ {{ form.observacoes.errors|join:", " }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Botões de ação -->
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border);">
+                        <a href="{% url 'inventario:lista_ativos' %}"
+                           style="display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid var(--border); text-decoration: none; transition: all 0.15s;"
+                           onmouseover="this.style.color='#E4E4F0'" onmouseout="this.style.color='#71717A'">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-nu">
+                            {% if ativo %}✏️ Salvar Alterações{% else %}＋ Cadastrar Ativo{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Controla a visibilidade da seção de alocação com base no status selecionado.
+         */
+        const selectStatus = document.getElementById('{{ form.status.id_for_label }}');
+        const secaoAlocacao = document.getElementById('secao-alocacao');
+        const labelReqCliente = document.getElementById('label-req-cliente');
+
+        function toggleAlocacao() {
+            const isAlocado = selectStatus.value === 'ALOCADO';
+            if (isAlocado) {
+                secaoAlocacao.style.maxHeight = '500px';
+                secaoAlocacao.style.opacity = '1';
+                labelReqCliente.style.display = 'inline';
+            } else {
+                secaoAlocacao.style.maxHeight = '0px';
+                secaoAlocacao.style.opacity = '0';
+                labelReqCliente.style.display = 'none';
+            }
+        }
+
+        toggleAlocacao();
+        selectStatus.addEventListener('change', toggleAlocacao);
+
+        /**
+         * Controla a visibilidade dos campos Serial vs Quantidade
+         * com base no checkbox "Controla Nº de Série".
+         */
+        const checkSerial = document.getElementById('{{ form.controla_serial.id_for_label }}');
+        const divSerial = document.getElementById('div-numero-serie');
+        const divQuantidade = document.getElementById('div-quantidade-estoque');
+        const labelReqSerial = document.getElementById('label-req-serial');
+
+        function toggleSerialFields() {
+            if (checkSerial.checked) {
+                divSerial.style.display = 'block';
+                divQuantidade.style.display = 'none';
+                labelReqSerial.style.display = 'inline';
+            } else {
+                divSerial.style.display = 'none';
+                divQuantidade.style.display = 'block';
+                labelReqSerial.style.display = 'none';
+            }
+        }
+
+        toggleSerialFields();
+        checkSerial.addEventListener('change', toggleSerialFields);
+
+        function toggleSidebar() {
+            document.getElementById('app-sidebar').classList.toggle('-translate-x-full');
+        }
+    </script>
+</body>
+</html>

@@ -1,145 +1,162 @@
 {% extends 'base.html' %}
+{% block title %}Detalhes da Oportunidade — AleTech ERP{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-md border border-gray-200">
-    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-        <h2 class="text-xl font-bold text-gray-800">Detalhes da Oportunidade</h2>
-        <a href="{% url 'painel_comercial' %}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition">&larr; Voltar ao Kanban</a>
-    </div>
+<div style="max-width: 760px; margin: 0 auto;">
 
-    <div class="space-y-5">
-        <div>
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Título da Proposta</span>
-            <p class="text-lg font-bold text-gray-900 mt-0.5">{{ op.titulo }}</p>
-            
-            {% if op.contrato_proposta %}
-            <div class="mt-2">
-                <a href="{{ op.contrato_proposta.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200 transition shadow-sm">
-                    📄 Abrir Proposta / Contrato (PDF) ↗
+    <!-- Back -->
+    <a href="{% url 'painel_comercial' %}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #71717A; text-decoration: none; margin-bottom: 20px; transition: color 0.15s;"
+       onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#71717A'">
+        ← Voltar ao Kanban
+    </a>
+
+    <!-- Main card -->
+    <div class="glass-card" style="padding: 32px;">
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div style="flex: 1; min-width: 0; margin-right: 20px;">
+                <span class="nu-label">Título da Proposta</span>
+                <h1 style="font-size: 20px; font-weight: 800; color: #FAFAFA; margin: 6px 0 0; letter-spacing: -0.3px; line-height: 1.3;">{{ op.titulo }}</h1>
+                {% if op.contrato_proposta %}
+                <a href="{{ op.contrato_proposta.url }}" target="_blank"
+                   style="display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; font-weight: 700; color: #34D399; text-decoration: none; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); padding: 6px 12px; border-radius: 8px; transition: all 0.15s;"
+                   onmouseover="this.style.background='rgba(52,211,153,0.18)'"
+                   onmouseout="this.style.background='rgba(52,211,153,0.1)'">
+                    📄 Abrir PDF da Proposta ↗
                 </a>
+                {% endif %}
             </div>
-            {% endif %}
+
+            <!-- Status badge -->
+            <div style="flex-shrink: 0;">
+                {% if op.estagio == 'Fechado_Ganhou' %}
+                    <span class="badge-nu badge-success" style="font-size: 13px; padding: 6px 14px;">🏆 Ganhou</span>
+                {% elif op.estagio == 'Fechado_Perdeu' %}
+                    <span class="badge-nu badge-danger" style="font-size: 13px; padding: 6px 14px;">✕ Perdeu</span>
+                {% elif op.estagio == 'Em_Teste' %}
+                    <span class="badge-nu badge-info" style="font-size: 13px; padding: 6px 14px;">🔬 Em Teste</span>
+                {% elif op.estagio == 'Proposta' %}
+                    <span class="badge-nu badge-purple" style="font-size: 13px; padding: 6px 14px;">📋 Proposta</span>
+                {% elif op.estagio == 'Negociação' %}
+                    <span class="badge-nu badge-warning" style="font-size: 13px; padding: 6px 14px;">🤝 Negociação</span>
+                {% else %}
+                    <span class="badge-nu badge-neutral" style="font-size: 13px; padding: 6px 14px;">{{ op.estagio }}</span>
+                {% endif %}
+            </div>
         </div>
-        
-        <div>
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cliente</span>
-            <p class="text-base font-medium text-gray-800 mt-0.5">{{ op.cliente.nome_fantasia }}</p>
-            
-            {% if op.cliente.ficha_cadastral %}
-            <div class="mt-2">
-                <a href="{{ op.cliente.ficha_cadastral.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-blue-700 hover:text-blue-900 font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition shadow-sm">
-                    👤 Visualizar Ficha Cadastral (PDF) ↗
+
+        <!-- Info grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px;">
+                <span class="nu-label">Cliente</span>
+                <p style="font-size: 15px; font-weight: 700; color: #FAFAFA; margin: 4px 0 0;">{{ op.cliente.nome_fantasia }}</p>
+                {% if op.cliente.ficha_cadastral %}
+                <a href="{{ op.cliente.ficha_cadastral.url }}" target="_blank"
+                   style="display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; font-size: 11px; font-weight: 700; color: #60A5FA; text-decoration: none; background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.2); padding: 5px 10px; border-radius: 7px;">
+                    👤 Ficha Cadastral ↗
                 </a>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-50">
-            <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor Estimado</span>
-                <p class="text-base font-extrabold text-emerald-600 mt-0.5">R$ {{ op.valor_estimado|floatformat:2 }}</p>
-            </div>
-            <div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Estágio Atual</span>
-                <div class="mt-1">
-                    {% if op.estagio == 'Fechado_Ganhou' %}
-                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold border border-emerald-200 shadow-xs">
-                            🏆 Fechado (Ganhou)
-                        </span>
-                    {% elif op.estagio == 'Fechado_Perdeu' %}
-                        <span class="px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg text-xs font-bold border border-rose-200 shadow-xs">
-                            ❌ Fechado (Perdeu)
-                        </span>
-                    {% else %}
-                        <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100 shadow-xs uppercase tracking-wider">
-                            {{ op.estagio }}
-                        </span>
-                    {% endif %}
-                </div>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px;">
+                <span class="nu-label">Valor Estimado</span>
+                <p style="font-size: 26px; font-weight: 900; color: #34D399; margin: 4px 0 0; letter-spacing: -0.5px;">
+                    R$ {{ op.valor_estimado|floatformat:2 }}
+                </p>
             </div>
         </div>
-        
+
         {% if op.descricao %}
-        <div class="pt-2 border-t border-gray-50">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Observações / Escopo</span>
-            <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 whitespace-pre-line break-words mt-1.5 leading-relaxed">{{ op.descricao }}</p>
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <span class="nu-label">Observações / Escopo</span>
+            <p style="font-size: 13px; color: #A1A1AA; line-height: 1.7; margin: 8px 0 0; white-space: pre-line;">{{ op.descricao }}</p>
         </div>
         {% endif %}
 
-        <div class="pt-4 border-t border-gray-100">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">🔬 Equipamentos em Teste / Validação</span>
-                
+        <!-- Equipamentos em Teste -->
+        <hr class="nu-divider">
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                    <h2 style="font-size: 14px; font-weight: 700; color: #FAFAFA; margin: 0;">🔬 Equipamentos em Teste</h2>
+                </div>
                 {% if not op.teste %}
-                    <a href="{% url 'gerenciar_teste' op.id %}" class="inline-flex items-center gap-1 text-xs bg-gray-900 hover:bg-black text-white font-bold px-2.5 py-1.5 rounded-lg shadow-xs transition">
-                        📦 Registrar Envio
-                    </a>
+                <a href="{% url 'gerenciar_teste' op.id %}" class="btn-nu" style="font-size: 12px; padding: 8px 14px; text-decoration: none;">
+                    📦 Registrar Envio
+                </a>
                 {% else %}
-                    <a href="{% url 'gerenciar_teste' op.id %}" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition">
-                        Editar Teste ⚙️
-                    </a>
+                <a href="{% url 'gerenciar_teste' op.id %}" class="btn-nu-outline" style="font-size: 12px; padding: 7px 14px; text-decoration: none;">
+                    ⚙️ Editar Teste
+                </a>
                 {% endif %}
             </div>
 
             {% if op.teste %}
-                <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-2xs">
-                    <div class="p-4 bg-sky-50/50 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                        <div>
-                            <span class="text-gray-400 block font-bold text-[10px] uppercase">Setor / Projeto:</span>
-                            <span class="font-semibold text-gray-800">{{ op.teste.setor_projeto }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-400 block font-bold text-[10px] uppercase">Data de Envio:</span>
-                            <span class="font-semibold text-gray-800">{{ op.teste.data_envio|date:"d/m/Y" }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-400 block font-bold text-[10px] uppercase">Período de Testes:</span>
-                            <span class="font-bold text-sky-800">{{ op.teste.dias_duracao }} dias</span>
-                            <span class="text-[10px] text-gray-400 block">(Devolução: {{ op.teste.data_devolucao_prevista|date:"d/m/Y" }})</span>
-                        </div>
+            <div style="background: rgba(96,165,250,0.05); border: 1px solid rgba(96,165,250,0.12); border-radius: 14px; overflow: hidden;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <span class="nu-label">Setor / Projeto</span>
+                        <p style="font-size: 13px; font-weight: 600; color: #D4D4D8; margin: 4px 0 0;">{{ op.teste.setor_projeto }}</p>
                     </div>
+                    <div>
+                        <span class="nu-label">Data de Envio</span>
+                        <p style="font-size: 13px; font-weight: 600; color: #D4D4D8; margin: 4px 0 0;">{{ op.teste.data_envio|date:"d/m/Y" }}</p>
+                    </div>
+                    <div>
+                        <span class="nu-label">Período</span>
+                        <p style="font-size: 13px; font-weight: 700; color: #60A5FA; margin: 4px 0 0;">{{ op.teste.dias_duracao }} dias</p>
+                        <p style="font-size: 11px; color: #52525B; margin: 2px 0 0;">Devolução: {{ op.teste.data_devolucao_prevista|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
 
-                    <div class="p-4">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead>
-                                    <tr class="border-b border-gray-200 text-gray-400 uppercase tracking-wider font-bold text-[10px]">
-                                        <th class="pb-2">Marca / Modelo</th>
-                                        <th class="pb-2">Nº de Série</th>
-                                        <th class="pb-2 text-center">Qtd</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 text-gray-700">
-                                    {% for equipamento in op.teste.equipamentos.all %}
-                                    <tr class="hover:bg-gray-100/40 transition-colors">
-                                        <td class="py-2 font-medium text-gray-900">{{ equipamento.marca }} - {{ equipamento.modelo }}</td>
-                                        <td class="py-2 font-mono text-gray-500">{{ equipamento.numero_serie }}</td>
-                                        <td class="py-2 text-center font-bold">{{ equipamento.quantidade }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        {% if op.teste.observacoes %}
-                            <div class="mt-3 pt-3 border-t border-gray-200 text-[11px] text-gray-500">
-                                <strong class="text-gray-700">Notas Adicionais:</strong> {{ op.teste.observacoes }}
-                            </div>
-                        {% endif %}
+                <div style="padding: 16px;">
+                    <table class="nu-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Marca / Modelo</th>
+                                <th>Nº de Série</th>
+                                <th style="text-align: center;">Qtd</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eq in op.teste.equipamentos.all %}
+                            <tr>
+                                <td style="font-weight: 600; color: #FAFAFA;">{{ eq.marca }} {{ eq.modelo }}</td>
+                                <td><code style="font-size: 12px; color: #71717A; background: rgba(255,255,255,0.04); padding: 2px 7px; border-radius: 5px;">{{ eq.numero_serie }}</code></td>
+                                <td style="text-align: center;"><span class="badge-nu badge-neutral">{{ eq.quantidade }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #52525B; font-style: italic; padding: 20px;">Nenhum item listado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if op.teste.observacoes %}
+                    <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <span class="nu-label">Notas Adicionais</span>
+                        <p style="font-size: 12px; color: #71717A; margin: 6px 0 0;">{{ op.teste.observacoes }}</p>
                     </div>
+                    {% endif %}
                 </div>
+            </div>
             {% else %}
-                <div class="p-4 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-center">
-                    <p class="text-xs text-gray-400">Nenhum equipamento foi cedido para testes nesta oportunidade.</p>
-                </div>
+            <div style="border: 1px dashed rgba(255,255,255,0.08); border-radius: 14px; padding: 32px; text-align: center;">
+                <p style="font-size: 13px; color: #52525B;">Nenhum equipamento cedido para teste nesta oportunidade.</p>
+            </div>
             {% endif %}
+        </div>
+
+        <!-- Footer actions -->
+        <hr class="nu-divider">
+        <div style="display: flex; justify-content: flex-end;">
+            <a href="{% url 'editar_proposta' op.id %}" class="btn-nu" style="text-decoration: none;">
+                ✏️ Editar Dados
+            </a>
         </div>
     </div>
 
-    <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end">
-        <a href="{% url 'editar_proposta' op.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow">
-            ✏️ Editar Dados
-        </a>
-    </div>
 </div>
 {% endblock %}

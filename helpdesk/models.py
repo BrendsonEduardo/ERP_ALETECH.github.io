@@ -64,6 +64,9 @@ class Chamado(models.Model):
     # Histórico para automações de notificações (ex: e-mail/WhatsApp)
     notificado_abertura = models.CharField(max_length=10, default='NÃO')
     ultimo_status_notificado = models.CharField(max_length=50, default='Nenhum')
+    
+    # Tempo de SLA em formato string (ex: "01:30:00") vindo da planilha
+    sla = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"#{self.id} - {self.empresa} ({self.status})"

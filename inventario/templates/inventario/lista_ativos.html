@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário de Ativos — AleTech ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root {
+            --surface-0: #09090B; --surface-1: #111117; --surface-2: #18181F;
+            --surface-3: #1E1E28; --border: rgba(255,255,255,0.07); --nu-purple: #8A05BE;
+        }
+        body { background: var(--surface-0); color: #E4E4F0; margin: 0; min-height: 100vh; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+
+        /* ── KPI Cards ──────────────────────────────────────────────────── */
+        .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; transition: all 0.25s; }
+        .stat-card:hover { border-color: rgba(138,5,190,0.3); box-shadow: 0 0 24px rgba(138,5,190,0.12); transform: translateY(-1px); }
+        .stat-card.clickable { cursor: pointer; text-decoration: none; display: block; }
+        .stat-card.active-filter { border-color: rgba(138,5,190,0.5) !important; box-shadow: 0 0 0 2px rgba(138,5,190,0.2), 0 0 24px rgba(138,5,190,0.15) !important; }
+
+        /* ── Table ──────────────────────────────────────────────────────── */
+        .nu-table { width: 100%; border-collapse: collapse; }
+        .nu-table thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; padding: 10px 16px 4px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+        .nu-table thead .th-filter { padding: 4px 16px 12px; }
+        .nu-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+        .nu-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .nu-table tbody td { padding: 13px 16px; font-size: 13px; color: #D4D4D8; vertical-align: middle; }
+        .nu-table tbody tr:last-child { border-bottom: none; }
+
+        /* ── Badges ─────────────────────────────────────────────────────── */
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
+        .badge-estoque    { background: rgba(96,165,250,0.12);  color: #60A5FA; border: 1px solid rgba(96,165,250,0.2); }
+        .badge-alocado    { background: rgba(52,211,153,0.12);  color: #34D399; border: 1px solid rgba(52,211,153,0.2); }
+        .badge-manutencao { background: rgba(251,191,36,0.12);  color: #FCD34D; border: 1px solid rgba(252,211,77,0.2); }
+        .badge-descarte   { background: rgba(244,114,182,0.12); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); }
+
+        /* ── Inputs / Selects ───────────────────────────────────────────── */
+        .nu-input { background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; color: #E4E4F0; padding: 7px 11px; font-size: 12px; transition: all 0.2s; outline: none; width: 100%; }
+        .nu-input:focus { border-color: rgba(138,5,190,0.6); box-shadow: 0 0 0 2px rgba(138,5,190,0.15); }
+        .nu-input::placeholder { color: #52525B; }
+        select.nu-input option { background: #18181F; }
+        .nu-input.has-value { border-color: rgba(138,5,190,0.45); background: rgba(138,5,190,0.06); }
+
+        /* ── Botões ─────────────────────────────────────────────────────── */
+        .btn-nu { background: linear-gradient(135deg, #8A05BE, #6B03A0); color: white; font-weight: 700; border-radius: 10px; padding: 10px 18px; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-nu:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(138,5,190,0.45); }
+        .btn-outline { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid var(--border); text-decoration: none; transition: all 0.15s; cursor: pointer; }
+        .btn-outline:hover { color: #E4E4F0; border-color: rgba(255,255,255,0.15); }
+        .btn-excel { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #34D399; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); text-decoration: none; transition: all 0.15s; }
+        .btn-excel:hover { background: rgba(52,211,153,0.14); border-color: rgba(52,211,153,0.35); }
+        .btn-icon { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+
+        /* ── Filtros ativos — tag pill ──────────────────────────────────── */
+        .filter-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: rgba(138,5,190,0.12); color: #C084F5; border: 1px solid rgba(138,5,190,0.2); }
+
+        /* ── Modal ──────────────────────────────────────────────────────── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9998; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .modal-box { background: var(--surface-2); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 25px 80px rgba(0,0,0,0.6); }
+
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
+    </style>
+</head>
+<body>
+
+    {% include "partials/sidebar.html" %}
+
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px; transition: margin 0.3s;">
+
+        <!-- ── Header ─────────────────────────────────────────────────── -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Inventário de Ativos</h1>
+                <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Gestão de hardware e equipamentos de TI</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+
+                <!-- Exportar Excel — preserva todos os filtros ativos -->
+                <a id="btn-exportar"
+                   href="?{% if f_q %}q={{ f_q|urlencode }}&{% endif %}{% if f_status %}status={{ f_status }}&{% endif %}{% if f_empresa %}empresa={{ f_empresa|urlencode }}&{% endif %}{% if f_modelo %}modelo={{ f_modelo|urlencode }}&{% endif %}export=excel"
+                   class="btn-excel"
+                   title="Exportar relatório filtrado para Excel">
+                    📊 Exportar Excel
+                </a>
+
+                <a href="{% url 'inventario:cadastrar_modelo' %}"
+                   class="btn-outline"
+                   onmouseover="this.style.color='#C084F5'; this.style.borderColor='rgba(138,5,190,0.3)';"
+                   onmouseout="this.style.color='#71717A'; this.style.borderColor='rgba(255,255,255,0.07)';">
+                    📦 Novo Modelo
+                </a>
+                <a href="{% url 'inventario:novo_ativo' %}" class="btn-nu">＋ Novo Ativo</a>
+            </div>
+        </div>
+
+        <!-- ── Mensagens flash ────────────────────────────────────────── -->
+        {% if messages %}
+        <div style="margin-bottom: 20px;">
+            {% for msg in messages %}
+            <div style="background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #34D399; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                {{ msg }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ── KPI Cards (reativos ao filtro) ────────────────────────── -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px;">
+
+            <a href="?status=ESTOQUE" class="stat-card clickable {% if f_status == 'ESTOQUE' %}active-filter{% endif %}"
+               style="border-left: 2px solid rgba(96,165,250,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Em Estoque</span>
+                <p style="font-size: 36px; font-weight: 900; color: #60A5FA; margin: 0; line-height: 1; letter-spacing: -1px;">{{ kpi_estoque }}</p>
+                {% if filtros_ativos %}
+                <span style="font-size: 10px; color: #52525B; display: block; margin-top: 6px;">↑ do filtro atual</span>
+                {% endif %}
+            </a>
+
+            <a href="?status=ALOCADO" class="stat-card clickable {% if f_status == 'ALOCADO' %}active-filter{% endif %}"
+               style="border-left: 2px solid rgba(52,211,153,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Alocados</span>
+                <p style="font-size: 36px; font-weight: 900; color: #34D399; margin: 0; line-height: 1; letter-spacing: -1px;">{{ kpi_alocado }}</p>
+                {% if filtros_ativos %}
+                <span style="font-size: 10px; color: #52525B; display: block; margin-top: 6px;">↑ do filtro atual</span>
+                {% endif %}
+            </a>
+
+            <a href="?status=MANUTENCAO" class="stat-card clickable {% if f_status == 'MANUTENCAO' %}active-filter{% endif %}"
+               style="border-left: 2px solid rgba(252,211,77,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Manutenção</span>
+                <p style="font-size: 36px; font-weight: 900; color: #FCD34D; margin: 0; line-height: 1; letter-spacing: -1px;">{{ kpi_manutencao }}</p>
+                {% if filtros_ativos %}
+                <span style="font-size: 10px; color: #52525B; display: block; margin-top: 6px;">↑ do filtro atual</span>
+                {% endif %}
+            </a>
+
+            <a href="?status=DESCARTE" class="stat-card clickable {% if f_status == 'DESCARTE' %}active-filter{% endif %}"
+               style="border-left: 2px solid rgba(244,114,182,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Descarte</span>
+                <p style="font-size: 36px; font-weight: 900; color: #F472B6; margin: 0; line-height: 1; letter-spacing: -1px;">{{ kpi_descarte }}</p>
+                {% if filtros_ativos %}
+                <span style="font-size: 10px; color: #52525B; display: block; margin-top: 6px;">↑ do filtro atual</span>
+                {% endif %}
+            </a>
+
+        </div>
+
+        <!-- ── Barra de filtros globais ───────────────────────────────── -->
+        <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px;">
+            <form id="form-filtros" method="GET">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+
+                    <!-- Busca livre -->
+                    <div style="flex: 2; min-width: 200px;">
+                        <label style="display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 5px;">Busca Livre</label>
+                        <input type="text" name="q" value="{{ f_q }}"
+                               placeholder="S/N, marca, modelo, unidade ou setor…"
+                               class="nu-input {% if f_q %}has-value{% endif %}"
+                               style="padding: 9px 14px; font-size: 13px;">
+                    </div>
+
+                    <!-- Status -->
+                    <div style="min-width: 170px;">
+                        <label style="display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 5px;">Status</label>
+                        <select name="status" class="nu-input {% if f_status %}has-value{% endif %}" style="padding: 9px 14px; font-size: 13px;">
+                            <option value="">— Todos —</option>
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if f_status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Botões -->
+                    <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                        <button type="submit" class="btn-nu" style="padding: 9px 16px;">🔍 Filtrar</button>
+                        {% if filtros_ativos %}
+                        <a href="{% url 'inventario:lista_ativos' %}" class="btn-outline" style="padding: 9px 14px; font-size: 13px;">✕ Limpar</a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </form>
+
+            <!-- Pills dos filtros ativos -->
+            {% if filtros_ativos %}
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <span style="font-size: 10px; color: #52525B; align-self: center; margin-right: 4px;">Filtros ativos:</span>
+                {% if f_q %}<span class="filter-pill">🔍 "{{ f_q }}"</span>{% endif %}
+                {% if f_status %}<span class="filter-pill">● {{ f_status }}</span>{% endif %}
+                {% if f_empresa %}<span class="filter-pill">🏢 {{ f_empresa }}</span>{% endif %}
+                {% if f_modelo %}<span class="filter-pill">🖥️ {{ f_modelo }}</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ── Tabela com filtros por coluna ──────────────────────────── -->
+        <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; overflow: hidden;">
+
+            <!-- Cabeçalho da tabela -->
+            <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 14px; font-weight: 700; color: #FAFAFA; margin: 0;">
+                    Ativos Cadastrados
+                    <span style="font-size: 12px; font-weight: 400; color: #52525B; margin-left: 8px;">{{ total }} resultado{{ total|pluralize:"s" }}</span>
+                </h2>
+                <a href="{% url 'inventario:lista_modelos' %}" style="font-size: 12px; color: #A855F7; text-decoration: none;"
+                   onmouseover="this.style.color='#C084F5'" onmouseout="this.style.color='#A855F7'">
+                    Ver catálogo →
+                </a>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="nu-table">
+                    <thead>
+                        <!-- Linha 1: Labels das colunas -->
+                        <tr>
+                            <th>S/N</th>
+                            <th>Equipamento</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Cliente / Empresa</th>
+                            <th>Unidade / Setor</th>
+                            <th>Cadastro</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                        <!-- Linha 2: Dropdowns de filtro por coluna -->
+                        <tr>
+                            <!-- S/N — sem filtro de coluna (coberto pela busca livre) -->
+                            <th class="th-filter"></th>
+
+                            <!-- Equipamento / Modelo -->
+                            <th class="th-filter">
+                                <form method="GET" style="margin:0;">
+                                    {% if f_q %}<input type="hidden" name="q" value="{{ f_q }}">{% endif %}
+                                    {% if f_status %}<input type="hidden" name="status" value="{{ f_status }}">{% endif %}
+                                    {% if f_empresa %}<input type="hidden" name="empresa" value="{{ f_empresa }}">{% endif %}
+                                    <select name="modelo" class="nu-input {% if f_modelo %}has-value{% endif %}"
+                                            onchange="this.form.submit()" title="Filtrar por modelo">
+                                        <option value="">— Todos modelos —</option>
+                                        {% for marca, mod in modelos_disponiveis %}
+                                        <option value="{{ marca }} {{ mod }}"
+                                            {% if f_modelo == marca|add:" "|add:mod %}selected{% endif %}>
+                                            {{ marca }} {{ mod }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </th>
+
+                            <!-- Categoria — sem filtro de coluna -->
+                            <th class="th-filter"></th>
+
+                            <!-- Status — já coberto pelo filtro global acima, mas repete inline para acesso rápido -->
+                            <th class="th-filter">
+                                <form method="GET" style="margin:0;">
+                                    {% if f_q %}<input type="hidden" name="q" value="{{ f_q }}">{% endif %}
+                                    {% if f_empresa %}<input type="hidden" name="empresa" value="{{ f_empresa }}">{% endif %}
+                                    {% if f_modelo %}<input type="hidden" name="modelo" value="{{ f_modelo }}">{% endif %}
+                                    <select name="status" class="nu-input {% if f_status %}has-value{% endif %}"
+                                            onchange="this.form.submit()" title="Filtrar por status">
+                                        <option value="">— Todos —</option>
+                                        {% for val, label in status_choices %}
+                                        <option value="{{ val }}" {% if f_status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </th>
+
+                            <!-- Cliente / Empresa -->
+                            <th class="th-filter">
+                                <form method="GET" style="margin:0;">
+                                    {% if f_q %}<input type="hidden" name="q" value="{{ f_q }}">{% endif %}
+                                    {% if f_status %}<input type="hidden" name="status" value="{{ f_status }}">{% endif %}
+                                    {% if f_modelo %}<input type="hidden" name="modelo" value="{{ f_modelo }}">{% endif %}
+                                    <select name="empresa" class="nu-input {% if f_empresa %}has-value{% endif %}"
+                                            onchange="this.form.submit()" title="Filtrar por empresa">
+                                        <option value="">— Todas empresas —</option>
+                                        {% for emp in empresas_disponiveis %}
+                                        <option value="{{ emp }}" {% if f_empresa == emp %}selected{% endif %}>{{ emp }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </th>
+
+                            <!-- Unidade / Setor — sem filtro de coluna -->
+                            <th class="th-filter"></th>
+                            <th class="th-filter"></th>
+                            <th class="th-filter"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ativo in ativos %}
+                        <tr>
+                            <!-- S/N -->
+                            <td>
+                                <span style="font-family: 'Courier New', monospace; font-weight: 700; color: #C084F5; font-size: 12px;">
+                                    {{ ativo.numero_serie }}
+                                </span>
+                            </td>
+
+                            <!-- Modelo -->
+                            <td>
+                                <p style="font-weight: 600; color: #FAFAFA; font-size: 13px; margin: 0;">{{ ativo.modelo_equipamento.marca }}</p>
+                                <p style="font-size: 11px; color: #71717A; margin: 2px 0 0;">{{ ativo.modelo_equipamento.modelo }}</p>
+                            </td>
+
+                            <!-- Categoria -->
+                            <td>
+                                <span style="font-size: 11px; color: #A1A1AA; background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px;">
+                                    {{ ativo.modelo_equipamento.get_categoria_display }}
+                                </span>
+                            </td>
+
+                            <!-- Status badge -->
+                            <td>
+                                {% if ativo.status == 'ESTOQUE' %}
+                                    <span class="badge badge-estoque">● Em Estoque</span>
+                                {% elif ativo.status == 'ALOCADO' %}
+                                    <span class="badge badge-alocado">● Alocado</span>
+                                {% elif ativo.status == 'MANUTENCAO' %}
+                                    <span class="badge badge-manutencao">● Manutenção</span>
+                                {% elif ativo.status == 'DESCARTE' %}
+                                    <span class="badge badge-descarte">● Descarte</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Cliente -->
+                            <td>
+                                {% if ativo.cliente_atual %}
+                                    <span style="font-weight: 600; font-size: 12px; color: #E4E4F0;">{{ ativo.cliente_atual.nome_fantasia }}</span>
+                                {% else %}
+                                    <span style="color: #3F3F46; font-size: 12px;">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Unidade / Setor -->
+                            <td>
+                                {% if ativo.unidade or ativo.setor %}
+                                    <p style="font-size: 12px; color: #A1A1AA; margin: 0;">{{ ativo.unidade|default:"—" }}</p>
+                                    <p style="font-size: 11px; color: #52525B; margin: 2px 0 0;">{{ ativo.setor|default:"" }}</p>
+                                {% else %}
+                                    <span style="color: #3F3F46; font-size: 12px;">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Data -->
+                            <td style="font-size: 11px; color: #71717A;">
+                                {{ ativo.data_cadastro|date:"d/m/Y" }}<br>
+                                <span style="color: #3F3F46;">{{ ativo.data_cadastro|date:"H:i" }}</span>
+                            </td>
+
+                            <!-- Ações -->
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; gap: 6px;">
+                                    <a href="{% url 'inventario:editar_ativo' ativo.pk %}" class="btn-icon" title="Editar ativo"
+                                       onmouseover="this.style.background='rgba(138,5,190,0.2)'; this.style.borderColor='rgba(138,5,190,0.3)';"
+                                       onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.07)';">✏️</a>
+                                    <button class="btn-icon" title="Excluir ativo"
+                                            onclick="abrirModalDeletar('{{ ativo.pk }}', '{{ ativo.numero_serie|escapejs }}')"
+                                            onmouseover="this.style.background='rgba(244,114,182,0.1)'; this.style.borderColor='rgba(244,114,182,0.3)';"
+                                            onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.07)';">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="padding: 56px; text-align: center;">
+                                <div style="font-size: 36px; margin-bottom: 12px;">🖥️</div>
+                                <p style="font-size: 14px; color: #52525B; margin: 0 0 16px;">
+                                    {% if filtros_ativos %}
+                                        Nenhum ativo corresponde aos filtros aplicados.
+                                    {% else %}
+                                        Nenhum ativo cadastrado ainda.
+                                    {% endif %}
+                                </p>
+                                {% if filtros_ativos %}
+                                <a href="{% url 'inventario:lista_ativos' %}" class="btn-outline" style="text-decoration: none;">✕ Limpar filtros</a>
+                                {% else %}
+                                <a href="{% url 'inventario:novo_ativo' %}" class="btn-nu" style="text-decoration: none;">＋ Cadastrar primeiro ativo</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Modal de exclusão ─────────────────────────────────────────── -->
+    <div class="modal-overlay" id="modal-deletar">
+        <div class="modal-box" style="max-width: 400px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 36px; margin-bottom: 12px;">⚠️</div>
+                <h3 style="font-size: 16px; font-weight: 800; color: #F472B6; margin: 0 0 6px;">Excluir Ativo?</h3>
+                <p style="font-size: 12px; color: #71717A; margin: 0;">S/N: <span id="modal-sn" style="font-family: monospace; color: #C084F5;"></span></p>
+            </div>
+            <p style="font-size: 12px; color: #52525B; text-align: center; margin-bottom: 20px;">Esta ação é irreversível e removerá o ativo do inventário.</p>
+            <form id="form-deletar" method="POST">
+                {% csrf_token %}
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="fecharModalDeletar()"
+                            style="flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            style="flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 800; background: rgba(244,114,182,0.15); border: 1px solid rgba(244,114,182,0.35); cursor: pointer; color: #F472B6;">
+                        Sim, excluir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ── Modal de exclusão ────────────────────────────────────────────
+        function abrirModalDeletar(pk, sn) {
+            document.getElementById('modal-sn').textContent = sn;
+            document.getElementById('form-deletar').action = '/inventario/deletar/' + pk + '/';
+            document.getElementById('modal-deletar').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function fecharModalDeletar() {
+            document.getElementById('modal-deletar').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('modal-deletar').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalDeletar();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') fecharModalDeletar();
+        });
+
+        // ── Atualiza o link de exportação quando o form de filtros muda ──
+        // (garante que o botão Exportar sempre reflita o filtro atual)
+        document.getElementById('form-filtros').addEventListener('change', function () {
+            // Deixa o form ser submetido normalmente — o botão exportar
+            // já lê os valores do Django (server-side), então é automático
+            // após a submissão. Aqui apenas garantimos o submit ao mudar selects.
+        });
+    </script>
+</body>
+</html>

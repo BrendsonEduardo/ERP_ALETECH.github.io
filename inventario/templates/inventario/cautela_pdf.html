@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cautela #{{ movimentacao.id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; width: 512pt; top: 792pt; height: 20pt;
+            }
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #000;
+        }
+        /* Header Table */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .header-table td {
+            vertical-align: middle;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        .logo-cell {
+            width: 120px;
+            height: 60px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .logo-img {
+            width: 100px;
+            height: 55px;
+        }
+        .title-cell {
+            text-align: center;
+        }
+        .title-cell h1 {
+            font-size: 14pt;
+            margin: 0;
+            padding: 0;
+            font-weight: bold;
+        }
+        .title-cell p {
+            font-size: 10pt;
+            margin: 5px 0 0 0;
+            font-weight: bold;
+        }
+        
+        /* Info Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table td {
+            width: 50%;
+            vertical-align: top;
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 9pt;
+            line-height: 1.3;
+        }
+        .info-title {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 5px;
+            font-size: 10pt;
+        }
+        
+        /* Text content */
+        .declaracao-box {
+            margin: 20px 0;
+            text-align: justify;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+        .obs-box {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            font-size: 9pt;
+            text-align: center; /* Centraliza a maioria, a gente sobrepõe nas outras classes */
+        }
+        .items-table th {
+            background-color: transparent;
+            font-weight: bold;
+        }
+        .text-left { text-align: left !important; }
+
+        /* Signatures */
+        .signatures-container {
+            width: 100%;
+            margin-top: 60px;
+            page-break-inside: avoid;
+        }
+        .signatures-table {
+            width: 100%;
+            border: none;
+        }
+        .signatures-table td {
+            width: 50%;
+            border: none;
+            text-align: center;
+            vertical-align: top;
+            padding: 10px;
+        }
+        .signature-section {
+            margin-top: 20px;
+            font-size: 10pt;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .signature-line-text {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .date-box {
+            margin-top: 40px;
+            text-align: right;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="footer_content" style="text-align: right; font-size: 8pt; color: #666;">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <!-- Linha 1: Cabeçalho -->
+    <table class="header-table">
+        <tr>
+            <td class="logo-cell">
+                <img src="{{ logo_path }}" class="logo-img" alt="Logo ALETECH">
+            </td>
+            <td class="title-cell">
+                <h1>A.S MARTINS LTDA</h1>
+                <p>
+                    {% if movimentacao.tipo == "ALOCACAO" or movimentacao.tipo == "TESTE" %}
+                        CAUTELA DE ENTREGA DE EQUIPAMENTO N° {{ movimentacao.id|stringformat:"04d" }}
+                    {% elif movimentacao.tipo == "DEVOLUCAO" %}
+                        CAUTELA DE DEVOLUÇÃO DE EQUIPAMENTO N° {{ movimentacao.id|stringformat:"04d" }}
+                    {% else %}
+                        CAUTELA DE MOVIMENTAÇÃO N° {{ movimentacao.id|stringformat:"04d" }}
+                    {% endif %}
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Linha 2: Info Empresa e Cliente -->
+    <table class="info-table">
+        <tr>
+            <td>
+                <strong>EMPRESA:</strong> A.S MARTINS LTDA<br>
+                <strong>CNPJ:</strong> 42.355.046/0001-73<br>
+                <strong>ENDEREÇO:</strong> R. Wanderlíria Freire, 54ª - Conjunto Eldorado, Manaus - AM, 69050-280
+            </td>
+            <td>
+                <strong>CLIENTE:</strong> {{ movimentacao.cliente.nome_fantasia }}<br>
+                {% if movimentacao.cliente.cnpj %}<strong>CNPJ:</strong> {{ movimentacao.cliente.cnpj }}<br>{% endif %}
+                <strong>ENDEREÇO:</strong> 
+                {% if movimentacao.cliente.endereco %}
+                    {{ movimentacao.cliente.endereco }}
+                {% else %}
+                    Não cadastrado
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Linha 3: Declaração Dinâmica -->
+    <div class="declaracao-box">
+        {% if movimentacao.tipo == "ALOCACAO" %}
+            Declaro que recebi os equipamentos para locação listados abaixo em perfeito estado de conservação e funcionando.
+        {% elif movimentacao.tipo == "TESTE" %}
+            Declaro que recebi os equipamentos listados abaixo para realização de testes.
+            <div class="obs-box">Obs: Teste</div>
+        {% elif movimentacao.tipo == "DEVOLUCAO" %}
+            Declaro que os equipamentos foram devolvidos em condições satisfatórias, conforme as disposições contratuais.
+        {% elif movimentacao.tipo == "TROCA" %}
+            Declaro a troca dos equipamentos listados, com a devolução do equipamento anterior e recebimento do substituto em perfeito estado.
+        {% else %}
+            Declaro a ciência da movimentação técnica dos equipamentos listados abaixo.
+        {% endif %}
+    </div>
+
+    <!-- Linha 4: Tabela de Itens -->
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">ITEM</th>
+                <th style="width: 35%;" class="text-left">EQUIPAMENTO</th>
+                <th style="width: 15%;">MARCA</th>
+                <th style="width: 15%;">MODELO</th>
+                <th style="width: 20%;">Nº SÉRIE</th>
+                <th style="width: 10%;">QTD</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-left">{{ item.ativo.modelo_equipamento.get_categoria_display }}</td>
+                <td>{{ item.ativo.modelo_equipamento.marca }}</td>
+                <td>{{ item.ativo.modelo_equipamento.modelo }}</td>
+                <td>{% if item.ativo.controla_serial and item.ativo.numero_serie %}{{ item.ativo.numero_serie }}{% else %}-{% endif %}</td>
+                <td>{{ item.quantidade }}</td>
+            </tr>
+            {% if movimentacao.tipo == "TROCA" and item.ativo_substituto %}
+            <!-- Linha extra indicando qual equipamento entrou -->
+            <tr>
+                <td>&gt;</td>
+                <td class="text-left">Substituto ({{ item.ativo_substituto.modelo_equipamento.get_categoria_display }})</td>
+                <td>{{ item.ativo_substituto.modelo_equipamento.marca }}</td>
+                <td>{{ item.ativo_substituto.modelo_equipamento.modelo }}</td>
+                <td>{% if item.ativo_substituto.controla_serial and item.ativo_substituto.numero_serie %}{{ item.ativo_substituto.numero_serie }}{% else %}-{% endif %}</td>
+                <td>1</td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum equipamento listado nesta movimentação.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="signatures-container">
+        <table class="signatures-table">
+            <tr>
+                <td style="text-align: left; padding-right: 20px;">
+                    <div class="signature-section">
+                        <span class="signature-line-text">Responsável pela entrega: ___________________________</span><br>
+                        <span class="signature-line-text">Setor: Suporte Técnico</span>
+                    </div>
+                </td>
+                <td style="text-align: left; padding-left: 20px;">
+                    <div class="signature-section">
+                        <span class="signature-line-text">Responsável pelo recebimento: ___________________________</span><br>
+                        <span class="signature-line-text">Setor: ___________________________</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Linha 6: Data -->
+    <div class="date-box">
+        Manaus, {% now "d \d\e F \d\e Y" %}
+    </div>
+
+</body>
+</html>

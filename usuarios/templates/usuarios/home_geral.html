@@ -1,114 +1,315 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - ALETECH ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Início — ERP AleTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --nu-purple: #8A05BE;
+            --nu-glow: rgba(138, 5, 190, 0.2);
+        }
+
+        body {
+            background: #09090B;
+            color: #E4E4F0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(138, 5, 190, 0.3);
+            border-radius: 99px;
+        }
+
+        .glass {
+            background: #18181F;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+        }
+
+        .glass-purple {
+            background: rgba(138, 5, 190, 0.08);
+            border: 1px solid rgba(138, 5, 190, 0.2);
+            border-radius: 16px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .module-card {
+            background: #18181F;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 160px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .aviso-card {
+            background: #18181F;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 16px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .border-urgente { border-left-color: #F472B6 !important; }
+        .border-sucesso { border-left-color: #34D399 !important; }
+        .border-alerta  { border-left-color: #FCD34D !important; }
+        .border-info    { border-left-color: #8A05BE !important; }
+
+        .text-urgente { color: #F472B6 !important; }
+        .text-sucesso { color: #34D399 !important; }
+        .text-alerta  { color: #FCD34D !important; }
+        .text-info    { color: #C084F5 !important; }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp 0.35s ease forwards;
+        }
+
+        .fade-up:nth-child(1) {
+            animation-delay: 0.05s;
+            opacity: 0;
+        }
+
+        .fade-up:nth-child(2) {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .fade-up:nth-child(3) {
+            animation-delay: 0.15s;
+            opacity: 0;
+        }
+
+        .fade-up:nth-child(4) {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
 
-    <header class="h-16 border-b border-gray-900 bg-gray-900/50 flex items-center justify-between px-8">
-        <div class="flex items-center space-x-2">
-            <span class="text-xl font-bold tracking-wider text-white">ALE<span class="text-blue-500">TECH</span> <span class="text-xs text-gray-400 font-normal">ERP</span></span>
+<body>
+
+    <!-- Header fixo -->
+    <header style="background: #0F0027; border-bottom: 1px solid rgba(138,5,190,0.15); height: 60px;"
+        class="flex items-center justify-between px-8 sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                style="background: linear-gradient(135deg, #8A05BE, #5B0080);">
+                <span class="text-white text-xs font-black">A</span>
+            </div>
+            <span class="text-white font-black text-sm tracking-tight">ALE<span
+                    style="color: #C084F5;">TECH</span></span>
+            <span class="text-[10px] font-medium ml-1" style="color: #52525B;">ERP</span>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-4">
             <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-white">{{ request.user.get_full_name|default:request.user.username }}</p>
-                <p class="text-xs text-gray-400">
-                    {{ request.user.get_cargo_display }} • <span class="text-blue-400 text-[11px]">{{ request.user.get_setor_display }}</span>
+                <p class="text-sm font-semibold text-white leading-tight">
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% else %}
+                        {{ request.user.username }}
+                    {% endif %}
+                </p>
+                <p class="text-[11px]" style="color: #A855F7;">
+                    {{ request.user.get_cargo_display }}{% if request.user.get_setor_display %} · {{ request.user.get_setor_display }}{% endif %}
                 </p>
             </div>
-            <form action="{% url 'logout' %}" method="POST" class="m-0 p-0">
+            <form action="{% url 'logout' %}" method="POST">
                 {% csrf_token %}
-                <button type="submit" class="bg-red-950/40 text-red-400 hover:bg-red-900 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-all">
-                    🚪 Sair
+                <button type="submit"
+                    style="background: rgba(244,114,182,0.08); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(244,114,182,0.15)'"
+                    onmouseout="this.style.background='rgba(244,114,182,0.08)'">
+                    Sair
                 </button>
             </form>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <section class="space-y-4">
-            <h2 class="text-sm font-bold uppercase tracking-widest text-gray-400 px-1">📢 Mural de Avisos</h2>
-            <div class="space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)] pr-2">
-                {% for aviso in avisos %}
-                <div class="p-4 rounded-lg border bg-gray-900/30 
-                    {% if aviso.tipo == 'urgente' %}border-red-900/50 bg-red-950/10 animate-pulse-slow{% elif aviso.tipo == 'sucesso' %}border-emerald-900/50 bg-emerald-950/10{% else %}border-gray-800{% endif %}">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-semibold text-sm {% if aviso.tipo == 'urgente' %}text-red-400{% elif aviso.tipo == 'sucesso' %}text-emerald-400{% else %}text-blue-400{% endif %}">
-                            {{ aviso.titulo }}
-                        </h3>
-                        <span class="text-[10px] text-gray-500 font-medium">{{ aviso.data }}</span>
-                    </div>
-                    <p class="text-xs text-gray-400 leading-relaxed">{{ aviso.conteudo }}</p>
+    <main style="flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 40px 32px;">
+
+        <!-- Saudação -->
+        <div class="fade-up" style="margin-bottom: 36px;">
+            <h1 style="font-size: 28px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.5px; margin: 0 0 6px;">
+                Olá, {{ request.user.first_name|default:request.user.username }} 👋
+            </h1>
+            <p style="font-size: 14px; color: #71717A; margin: 0;">
+                Bem-vindo ao ERP AleTech. Selecione um módulo para começar.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 32px;" class="fade-up">
+
+            <!-- Módulos -->
+            <section>
+                <p
+                    style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin-bottom: 14px;">
+                    Módulos disponíveis
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+
+                    <!-- Helpdesk -->
+                    <a href="{% url 'painel_helpdesk' %}" class="module-card fade-up"
+                        style="--hover-border: rgba(96,165,250,0.4);"
+                        onmouseover="this.style.borderColor='rgba(96,165,250,0.3)'"
+                        onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div
+                                style="width: 44px; height: 44px; border-radius: 12px; background: rgba(96,165,250,0.12); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid rgba(96,165,250,0.2);">
+                                🎫
+                            </div>
+                            <span class="badge"
+                                style="background: rgba(96,165,250,0.1); color: #60A5FA; border: 1px solid rgba(96,165,250,0.2);">Ativo</span>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: #FAFAFA; margin: 0 0 4px;">Helpdesk
+                            </h3>
+                            <p style="font-size: 12px; color: #71717A; margin: 0;">Gestão de chamados técnicos e SLA</p>
+                        </div>
+                    </a>
+
+                    {% if pode_ver_comercial %}
+                    <!-- Comercial -->
+                    <a href="{% url 'painel_comercial' %}" class="module-card fade-up"
+                        onmouseover="this.style.borderColor='rgba(138,5,190,0.4)'"
+                        onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div
+                                style="width: 44px; height: 44px; border-radius: 12px; background: rgba(138,5,190,0.12); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid rgba(138,5,190,0.25);">
+                                📊
+                            </div>
+                            <span class="badge"
+                                style="background: rgba(138,5,190,0.12); color: #C084F5; border: 1px solid rgba(192,132,245,0.2);">Pipeline</span>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: #FAFAFA; margin: 0 0 4px;">Comercial
+                            </h3>
+                            <p style="font-size: 12px; color: #71717A; margin: 0;">Pipeline de vendas, Kanban e Clientes
+                            </p>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    {% if request.user.is_superuser or request.user.setor == 'FINANCEIRO' or request.user.cargo in 'FINAN,DONO' %}
+                    <!-- Financeiro -->
+                    <a href="#" class="module-card fade-up" onmouseover="this.style.borderColor='rgba(52,211,153,0.3)'"
+                        onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div
+                                style="width: 44px; height: 44px; border-radius: 12px; background: rgba(52,211,153,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid rgba(52,211,153,0.2);">
+                                💰
+                            </div>
+                            <span class="badge"
+                                style="background: rgba(52,211,153,0.1); color: #34D399; border: 1px solid rgba(52,211,153,0.2);">Em
+                                breve</span>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: #FAFAFA; margin: 0 0 4px;">Financeiro
+                            </h3>
+                            <p style="font-size: 12px; color: #71717A; margin: 0;">Fluxo de caixa, contratos e cobranças
+                            </p>
+                        </div>
+                    </a>
+                    {% endif %}
+
                 </div>
-                {% empty %}
-                <p class="text-xs text-gray-500 italic p-4 border border-gray-900 rounded-lg text-center">Nenhum aviso no mural hoje.</p>
-                {% endfor %}
-            </div>
-        </section>
+            </section>
 
-        <section class="lg:col-span-2 space-y-4">
-            <h2 class="text-sm font-bold uppercase tracking-widest text-gray-400 px-1">🎛️ Módulos do Sistema</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                <a href="{% url 'painel_helpdesk' %}" class="group p-5 bg-gray-900/40 border border-gray-800 rounded-xl hover:border-blue-500/50 hover:bg-gray-900/80 transition-all flex flex-col justify-between h-40 shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div class="p-3 bg-blue-600/10 text-blue-500 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all text-2xl">
-                            🎫
+            <!-- Mural de Avisos -->
+            <section>
+                <p
+                    style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; margin-bottom: 14px;">
+                    Mural de Avisos
+                </p>
+                <div
+                    style="display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 4px;">
+                    {% for aviso in avisos %}
+                    <div class="aviso-card fade-up border-{% if aviso.tipo == 'urgente' %}urgente{% elif aviso.tipo == 'sucesso' %}sucesso{% elif aviso.tipo == 'alerta' %}alerta{% else %}info{% endif %}">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                            <span class="text-{% if aviso.tipo == 'urgente' %}urgente{% elif aviso.tipo == 'sucesso' %}sucesso{% elif aviso.tipo == 'alerta' %}alerta{% else %}info{% endif %}"
+                                style="font-size: 12px; font-weight: 700;">
+                                {{ aviso.titulo }}
+                            </span>
+                            <span
+                                style="font-size: 10px; color: #3F3F46; font-weight: 500; white-space: nowrap; margin-left: 8px;">
+                                {{ aviso.data_publicacao|date:"d/m" }}
+                            </span>
                         </div>
-                        <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide">Ativo</span>
+                        <p style="font-size: 12px; color: #71717A; line-height: 1.5; margin: 0;">{{ aviso.conteudo }}
+                        </p>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-white group-hover:text-blue-400 transition-colors">Helpdesk & Suporte</h3>
-                        <p class="text-xs text-gray-400 mt-1 truncate">Gerenciamento de chamados técnicos e SLA.</p>
+                    {% empty %}
+                    <div
+                        style="background: #18181F; border: 1px dashed rgba(255,255,255,0.08); border-radius: 14px; padding: 32px; text-align: center;">
+                        <p style="font-size: 13px; color: #3F3F46;">Nenhum aviso no mural.</p>
                     </div>
-                </a>
+                    {% endfor %}
+                </div>
+            </section>
 
-                {% if pode_ver_comercial %}
-                <a href="{% url 'painel_comercial' %}" class="group p-5 bg-gray-900/40 border border-gray-800 rounded-xl hover:border-purple-500/50 hover:bg-gray-900/80 transition-all flex flex-col justify-between h-40 shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div class="p-3 bg-purple-600/10 text-purple-500 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-all text-2xl">
-                            📊
-                        </div>
-                        <span class="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide">Acesso Liberado</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white group-hover:text-purple-400 transition-colors">Comercial</h3>
-                        <p class="text-xs text-gray-400 mt-1 truncate">Pipeline de vendas, Kanban e Clientes.</p>
-                    </div>
-                </a>
-                {% endif %}
-
-                {% if request.user.is_superuser or request.user.setor == 'FINANCEIRO' or request.user.cargo in 'FINAN,DONO' %}
-                <a href="#" class="group p-5 bg-gray-900/40 border border-gray-800 rounded-xl hover:border-emerald-500/50 hover:bg-gray-900/80 transition-all flex flex-col justify-between h-40 shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div class="p-3 bg-emerald-600/10 text-emerald-500 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-all text-2xl">
-                            💰
-                        </div>
-                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold uppercase tracking-wide">Acesso Liberado</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white group-hover:text-emerald-400 transition-colors">Financeiro</h3>
-                        <p class="text-xs text-gray-400 mt-1 truncate">Fluxo de caixa, faturamento e contratos.</p>
-                    </div>
-                </a>
-                {% endif %}
-
-            </div>
-        </section>
-
+        </div>
     </main>
 
-    <footer class="text-center py-4 text-xs text-gray-600 border-t border-gray-900">
-        &copy; 2026 ALETECH ERP. Todos os direitos reservados.
+    <footer
+        style="border-top: 1px solid rgba(255,255,255,0.05); padding: 16px 32px; text-align: center; font-size: 11px; color: #3F3F46; font-weight: 500;">
+        © 2026 ERP AleTech
     </footer>
 
 </body>
+
 </html>

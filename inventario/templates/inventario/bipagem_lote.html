@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário em Lote — AleTech ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root {
+            --surface-0: #09090B; --surface-1: #111117; --surface-2: #18181F;
+            --surface-3: #1E1E28; --border: rgba(255,255,255,0.07);
+        }
+        body { background: var(--surface-0); color: #E4E4F0; margin: 0; min-height: 100vh; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+
+        /* ── Layout ─────────────────────────────────────────────────────── */
+        .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+
+        /* ── Inputs ──────────────────────────────────────────────────────── */
+        .nu-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 6px; }
+        .nu-input {
+            width: 100%; background: var(--surface-3); border: 1px solid var(--border);
+            border-radius: 10px; color: #E4E4F0; padding: 10px 14px; font-size: 14px;
+            transition: all 0.2s; outline: none;
+        }
+        .nu-input:focus { border-color: rgba(138,5,190,0.6); box-shadow: 0 0 0 3px rgba(138,5,190,0.15); }
+        .nu-input::placeholder { color: #52525B; }
+        .nu-input:disabled { opacity: 0.4; cursor: not-allowed; }
+        select.nu-input option { background: #18181F; }
+
+        /* ── Botões ──────────────────────────────────────────────────────── */
+        .btn-nu {
+            background: linear-gradient(135deg, #8A05BE, #6B03A0); color: white;
+            font-weight: 700; border-radius: 10px; padding: 11px 20px; font-size: 13px;
+            border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3);
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-nu:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(138,5,190,0.45); }
+        .btn-outline {
+            background: rgba(255,255,255,0.04); color: #A1A1AA; font-weight: 600;
+            border-radius: 10px; padding: 11px 20px; font-size: 13px;
+            border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-outline:hover { background: rgba(244,114,182,0.08); color: #F472B6; border-color: rgba(244,114,182,0.3); }
+
+        /* ── Campo de Bipagem ────────────────────────────────────────────── */
+        #campo-bip {
+            font-size: 20px; font-weight: 700; letter-spacing: 2px;
+            border: 2px solid rgba(138,5,190,0.5); border-radius: 14px;
+            background: rgba(138,5,190,0.05); padding: 16px 20px;
+            transition: all 0.2s; color: #FAFAFA; text-align: center;
+        }
+        #campo-bip:focus { border-color: #8A05BE; box-shadow: 0 0 0 4px rgba(138,5,190,0.2), 0 0 30px rgba(138,5,190,0.15); }
+        #campo-bip.bip-ok    { border-color: #34D399; box-shadow: 0 0 0 4px rgba(52,211,153,0.2); animation: flash-ok 0.4s ease; }
+        #campo-bip.bip-erro  { border-color: #F472B6; box-shadow: 0 0 0 4px rgba(244,114,182,0.2); animation: flash-err 0.4s ease; }
+
+        @keyframes flash-ok  { 0%,100% { background: rgba(138,5,190,0.05); } 50% { background: rgba(52,211,153,0.12); } }
+        @keyframes flash-err { 0%,100% { background: rgba(138,5,190,0.05); } 50% { background: rgba(244,114,182,0.12); } }
+
+        /* ── Lista de resultados ─────────────────────────────────────────── */
+        .item-lista {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 16px; border-radius: 12px; margin-bottom: 6px;
+            animation: slide-in 0.25s ease;
+        }
+        .item-ok   { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.18); }
+        .item-erro { background: rgba(244,114,182,0.08); border: 1px solid rgba(244,114,182,0.18); }
+
+        @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Contador flutuante ──────────────────────────────────────────── */
+        #contador-badge {
+            position: fixed; top: 20px; right: 24px; z-index: 100;
+            background: linear-gradient(135deg, #8A05BE, #6B03A0);
+            border-radius: 14px; padding: 8px 16px; font-size: 13px; font-weight: 800;
+            color: white; box-shadow: 0 8px 24px rgba(138,5,190,0.4);
+            transition: all 0.3s; display: none;
+        }
+
+        /* ── Seção de bipagem oculta inicialmente ────────────────────────── */
+        #secao-bipagem { display: none; }
+
+        /* ── Contexto bloqueado ──────────────────────────────────────────── */
+        .contexto-locked .lock-indicator { display: flex; }
+        .lock-indicator { display: none; }
+
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
+    </style>
+</head>
+<body>
+
+    {% include "partials/sidebar.html" %}
+
+    <!-- Contador flutuante de bips bem-sucedidos -->
+    <div id="contador-badge">✓ <span id="contador-num">0</span> cadastrado(s)</div>
+
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px; transition: margin 0.3s;">
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <a href="{% url 'inventario:lista_ativos' %}"
+                   style="font-size: 12px; color: #52525B; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px;"
+                   onmouseover="this.style.color='#A855F7'" onmouseout="this.style.color='#52525B'">
+                    ← Voltar ao Inventário
+                </a>
+                <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">
+                    ⚡ Inventário em Lote
+                </h1>
+                <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">
+                    Configure o contexto uma vez — bipe os equipamentos continuamente.
+                </p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+
+            <!-- ── COLUNA ESQUERDA: Contexto + Bipagem ──────────────────── -->
+            <div>
+
+                <!-- Seção 1: Contexto Padrão -->
+                <div class="card" id="card-contexto" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 style="font-size: 14px; font-weight: 800; color: #FAFAFA; margin: 0;">1. Contexto Padrão</h2>
+                            <p style="font-size: 12px; color: #52525B; margin: 3px 0 0;">Defina o perfil que será aplicado a todos os bips desta sessão.</p>
+                        </div>
+                        <!-- Indicador de contexto bloqueado -->
+                        <div class="lock-indicator" id="lock-indicator"
+                             style="background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); border-radius: 10px; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #34D399; gap: 5px; align-items: center;">
+                            🔒 BLOQUEADO
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+                        <!-- Modelo (largura total) -->
+                        <div style="grid-column: 1 / -1;">
+                            <label class="nu-label" for="sel-modelo">Modelo do Equipamento *</label>
+                            <select id="sel-modelo" class="nu-input">
+                                <option value="">— Selecione um modelo —</option>
+                                {% for modelo in modelos %}
+                                <option value="{{ modelo.pk }}">{{ modelo.marca }} {{ modelo.modelo }} ({{ modelo.get_categoria_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="nu-label" for="sel-status">Status Operacional *</label>
+                            <select id="sel-status" class="nu-input">
+                                {% for val, label in status_choices %}
+                                <option value="{{ val }}" {% if val == 'ESTOQUE' %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Unidade -->
+                        <div>
+                            <label class="nu-label" for="inp-unidade">Unidade</label>
+                            <input type="text" id="inp-unidade" class="nu-input" placeholder="Ex: Matriz, Filial AM">
+                        </div>
+
+                        <!-- Setor (largura total) -->
+                        <div style="grid-column: 1 / -1;">
+                            <label class="nu-label" for="inp-setor">Setor</label>
+                            <input type="text" id="inp-setor" class="nu-input" placeholder="Ex: Financeiro, RH, TI">
+                        </div>
+
+                    </div>
+
+                    <!-- Botões de controle do contexto -->
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button id="btn-bloquear" onclick="bloquearContexto()" class="btn-nu" style="flex: 1;">
+                            🔒 Bloquear e Iniciar Bipagem
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Seção 2: Bipagem Contínua -->
+                <div class="card" id="secao-bipagem">
+                    <h2 style="font-size: 14px; font-weight: 800; color: #FAFAFA; margin: 0 0 6px;">2. Bipagem Contínua</h2>
+                    <p style="font-size: 12px; color: #52525B; margin: 0 0 20px;">
+                        Aponte o leitor para o código de barras. O campo é refocado automaticamente após cada bip.
+                    </p>
+
+                    <!-- Resumo do contexto ativo -->
+                    <div id="resumo-contexto"
+                         style="background: rgba(138,5,190,0.06); border: 1px solid rgba(138,5,190,0.15); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 12px; color: #A1A1AA; line-height: 1.8;">
+                    </div>
+
+                    <!-- Campo de bipagem -->
+                    <label class="nu-label" for="campo-bip">
+                        Número de Série — bipagem ativa
+                        <span style="color: #34D399; margin-left: 6px; font-size: 9px;">● AO VIVO</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="campo-bip"
+                        class="nu-input"
+                        placeholder="Aguardando bip…"
+                        autocomplete="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                    >
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                        <button onclick="desbloquearContexto()" class="btn-outline" style="font-size: 12px; padding: 8px 14px;">
+                            🔓 Desbloquear Contexto
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── COLUNA DIREITA: Log de resultados ────────────────────── -->
+            <div class="card" style="position: sticky; top: 32px; max-height: calc(100vh - 100px); display: flex; flex-direction: column;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
+                    <div>
+                        <h2 style="font-size: 14px; font-weight: 800; color: #FAFAFA; margin: 0;">Log da Sessão</h2>
+                        <p style="font-size: 11px; color: #52525B; margin: 3px 0 0;">
+                            <span id="log-ok-count" style="color: #34D399; font-weight: 700;">0</span> cadastrados ·
+                            <span id="log-err-count" style="color: #F472B6; font-weight: 700;">0</span> com erro
+                        </p>
+                    </div>
+                    <button onclick="limparLog()"
+                            style="font-size: 11px; color: #52525B; background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.15s;"
+                            onmouseover="this.style.color='#F472B6'" onmouseout="this.style.color='#52525B'">
+                        🗑 Limpar log
+                    </button>
+                </div>
+
+                <!-- Lista de itens bipados -->
+                <div id="lista-bips" style="flex: 1; overflow-y: auto; padding-right: 4px;">
+                    <!-- Placeholder inicial -->
+                    <div id="placeholder-log" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #3F3F46;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📡</div>
+                        <p style="font-size: 13px; text-align: center;">Bloqueie o contexto e comece a bipar.<br>Os resultados aparecerão aqui.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+    /**
+     * bipagem_lote.js — Inventário em Lote
+     *
+     * Fluxo:
+     *  1. Operador configura o contexto (modelo, status, unidade, setor).
+     *  2. Clica em "Bloquear" → campos são desabilitados, seção de bip aparece.
+     *  3. Cada "Enter" no campo de S/N dispara um fetch POST assíncrono.
+     *  4. Resposta OK  → item verde no log + refoca + limpa input.
+     *     Resposta ERR → item vermelho no log + refoca (sem limpar para revisão).
+     */
+
+    // ── Estado da sessão ─────────────────────────────────────────────────────
+    let contexto = { modelo_id: null, status: 'ESTOQUE', unidade: '', setor: '' };
+    let totalOk  = 0;
+    let totalErr = 0;
+
+    // ── Token CSRF (lido do cookie, sem dependência externa) ─────────────────
+    function getCsrfToken() {
+        const match = document.cookie.match(/csrftoken=([^;]+)/);
+        return match ? match[1] : '';
+    }
+
+    // ── Bloquear contexto e ativar bipagem ───────────────────────────────────
+    function bloquearContexto() {
+        const modeloId = document.getElementById('sel-modelo').value;
+        if (!modeloId) {
+            pulsarErro(document.getElementById('sel-modelo'), 'Selecione um modelo antes de bloquear.');
+            return;
+        }
+
+        // Captura o contexto
+        contexto = {
+            modelo_id : modeloId,
+            status    : document.getElementById('sel-status').value,
+            unidade   : document.getElementById('inp-unidade').value.trim(),
+            setor     : document.getElementById('inp-setor').value.trim(),
+        };
+
+        // Desabilita os campos de contexto
+        ['sel-modelo', 'sel-status', 'inp-unidade', 'inp-setor'].forEach(id => {
+            document.getElementById(id).disabled = true;
+        });
+
+        // Mostra indicador de lock
+        document.getElementById('lock-indicator').style.display = 'flex';
+        document.getElementById('btn-bloquear').disabled = true;
+        document.getElementById('btn-bloquear').style.opacity = '0.5';
+
+        // Monta resumo do contexto
+        const modeloTxt = document.getElementById('sel-modelo').options[document.getElementById('sel-modelo').selectedIndex].text;
+        const statusTxt = document.getElementById('sel-status').options[document.getElementById('sel-status').selectedIndex].text;
+        const resumo    = document.getElementById('resumo-contexto');
+        resumo.innerHTML =
+            `<strong style="color:#C084F5;">Modelo:</strong> ${modeloTxt}<br>` +
+            `<strong style="color:#C084F5;">Status:</strong> ${statusTxt}` +
+            (contexto.unidade ? `<br><strong style="color:#C084F5;">Unidade:</strong> ${contexto.unidade}` : '') +
+            (contexto.setor   ? `<br><strong style="color:#C084F5;">Setor:</strong> ${contexto.setor}` : '');
+
+        // Exibe a seção de bipagem
+        document.getElementById('secao-bipagem').style.display = 'block';
+        document.getElementById('contador-badge').style.display = 'block';
+
+        // Foca o campo de bip
+        focarCampoBip();
+    }
+
+    // ── Desbloquear contexto ─────────────────────────────────────────────────
+    function desbloquearContexto() {
+        ['sel-modelo', 'sel-status', 'inp-unidade', 'inp-setor'].forEach(id => {
+            document.getElementById(id).disabled = false;
+        });
+        document.getElementById('lock-indicator').style.display = 'none';
+        document.getElementById('btn-bloquear').disabled = false;
+        document.getElementById('btn-bloquear').style.opacity = '1';
+        document.getElementById('secao-bipagem').style.display = 'none';
+    }
+
+    // ── Focar campo de bip ───────────────────────────────────────────────────
+    function focarCampoBip() {
+        const el = document.getElementById('campo-bip');
+        el.value = '';
+        el.focus();
+    }
+
+    // ── Capturar "Enter" no campo de bip ────────────────────────────────────
+    document.getElementById('campo-bip').addEventListener('keydown', async function(e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+
+        const sn = this.value.trim();
+        if (!sn) { focarCampoBip(); return; }
+
+        // Envia para o servidor
+        await salvarAtivo(sn);
+    });
+
+    // ── Enviar via Fetch API (AJAX) ──────────────────────────────────────────
+    async function salvarAtivo(numero_serie) {
+        const campo = document.getElementById('campo-bip');
+        campo.disabled = true; // bloqueia durante a requisição
+
+        try {
+            const resp = await fetch("{% url 'inventario:bipagem_lote' %}", {
+                method : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken' : getCsrfToken(),
+                },
+                body: JSON.stringify({ ...contexto, numero_serie }),
+            });
+
+            const data = await resp.json();
+
+            if (resp.ok && data.ok) {
+                // ✅ Sucesso
+                registrarLog(numero_serie, null);
+                flashCampo('bip-ok');
+            } else {
+                // ❌ Erro (duplicata ou validação)
+                registrarLog(numero_serie, data.erro || 'Erro desconhecido');
+                flashCampo('bip-erro');
+                campo.value = numero_serie; // mantém o S/N para revisão
+            }
+        } catch (err) {
+            registrarLog(numero_serie, 'Falha de rede. Verifique a conexão.');
+            flashCampo('bip-erro');
+        } finally {
+            campo.disabled = false;
+            campo.focus();
+        }
+    }
+
+    // ── Flash visual no campo ────────────────────────────────────────────────
+    function flashCampo(classe) {
+        const el = document.getElementById('campo-bip');
+        el.classList.add(classe);
+        setTimeout(() => { el.classList.remove(classe); if (classe === 'bip-ok') el.value = ''; }, 500);
+    }
+
+    // ── Registrar item no log ────────────────────────────────────────────────
+    function registrarLog(sn, erro) {
+        const lista = document.getElementById('lista-bips');
+
+        // Remove placeholder na primeira vez
+        const placeholder = document.getElementById('placeholder-log');
+        if (placeholder) placeholder.remove();
+
+        const ok    = !erro;
+        const div   = document.createElement('div');
+        div.className = `item-lista ${ok ? 'item-ok' : 'item-erro'}`;
+
+        const hora  = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                <span style="font-size:18px;">${ok ? '✅' : '❌'}</span>
+                <div style="overflow:hidden;">
+                    <p style="font-family:'Courier New',monospace; font-weight:700; font-size:13px;
+                               color:${ok ? '#34D399' : '#F472B6'}; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${sn}
+                    </p>
+                    ${erro ? `<p style="font-size:11px; color:#71717A; margin:2px 0 0;">${erro}</p>` : ''}
+                </div>
+            </div>
+            <span style="font-size:10px; color:#52525B; flex-shrink:0; margin-left:8px;">${hora}</span>
+        `;
+
+        // Insere no topo para que os mais recentes apareçam primeiro
+        lista.insertBefore(div, lista.firstChild);
+
+        // Atualiza contadores
+        if (ok) {
+            totalOk++;
+            document.getElementById('campo-bip').value = '';
+        } else {
+            totalErr++;
+        }
+        document.getElementById('log-ok-count').textContent  = totalOk;
+        document.getElementById('log-err-count').textContent = totalErr;
+        document.getElementById('contador-num').textContent  = totalOk;
+    }
+
+    // ── Limpar log ───────────────────────────────────────────────────────────
+    function limparLog() {
+        const lista = document.getElementById('lista-bips');
+        lista.innerHTML = '';
+        totalOk = totalErr = 0;
+        document.getElementById('log-ok-count').textContent = 0;
+        document.getElementById('log-err-count').textContent = 0;
+        document.getElementById('contador-num').textContent  = 0;
+    }
+
+    // ── Mostrar toast de erro nos selects ────────────────────────────────────
+    function pulsarErro(el, msg) {
+        el.style.borderColor = 'rgba(244,114,182,0.8)';
+        el.style.boxShadow   = '0 0 0 3px rgba(244,114,182,0.2)';
+        el.focus();
+        setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 1800);
+        alert(msg); // simples — pode ser substituído por toast customizado
+    }
+
+    // ── Sidebar mobile ───────────────────────────────────────────────────────
+    function toggleSidebar() {
+        document.getElementById('app-sidebar').classList.toggle('-translate-x-full');
+    }
+    </script>
+</body>
+</html>

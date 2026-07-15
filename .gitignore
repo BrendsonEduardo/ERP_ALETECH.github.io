@@ -1,5 +1,6 @@
 # Chaves e Credenciais
 credenciais.json
+.env
 
 # Banco de dados local
 db.sqlite3
@@ -11,3 +12,8 @@ __pycache__/
 # Arquivos de log e mídia local
 log_sincronizacao.txt
 media/
+
+# Ambiente virtual
+venv/
+.venv/
+env/

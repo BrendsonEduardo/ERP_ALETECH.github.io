@@ -66,6 +66,12 @@ class Command(BaseCommand):
             else:
                 ultimo_comentario = str(ultimo_comentario).strip()
 
+            sla_planilha = linha.get('SLA')
+            if not sla_planilha or str(sla_planilha).strip() == "" or str(sla_planilha).lower() == 'nan':
+                sla_planilha = ""
+            else:
+                sla_planilha = str(sla_planilha).strip()
+
             # Conversão inteligente de data/hora
             data_hora_final = None
             if data_criacao_str and data_criacao_str != 'nan':
@@ -82,6 +88,7 @@ class Command(BaseCommand):
                 chamado = Chamado.objects.get(id_integracao=id_unico_linha)
                 chamado.status = status_planilha
                 chamado.ultimo_comentario = ultimo_comentario
+                chamado.sla = sla_planilha
                 chamado.save()
                 self.stdout.write(self.style.SUCCESS(f'Linha {linha_real_sheets} atualizada com sucesso.'))
                 
@@ -97,7 +104,8 @@ class Command(BaseCommand):
                     equipamento=equipamento if (equipamento and str(equipamento) != 'nan') else "Outros",
                     problema=problema if (problema and str(problema) != 'nan') else "",
                     status=status_planilha,
-                    ultimo_comentario=ultimo_comentario
+                    ultimo_comentario=ultimo_comentario,
+                    sla=sla_planilha
                 )
                 self.stdout.write(self.style.SUCCESS(f'Novo chamado criado para a Linha {linha_real_sheets}. Chave: {id_unico_linha}'))
 

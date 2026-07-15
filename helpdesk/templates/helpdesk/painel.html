@@ -3,256 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle - HELPDESK</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Helpdesk — AleTech ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; color: #25D366 !important; }
-        .status-aberto { color: #dc3545; font-weight: bold; }
-        .status-atendimento { color: #fd7e14; font-weight: bold; }
-        .status-usuario { color: #0dcaf0; font-weight: bold; }
-        .status-terceiros { color: #6f42c1; font-weight: bold; }
-        .status-resolvido { color: #198754; font-weight: bold; }
-        .status-encerrado { color: #212529; font-weight: bold; opacity: 0.6; }
-        
-        /* Estilo para deixar o link do ID discreto e profissional */
-        .link-id {
-            color: #0d6efd;
-            text-decoration: none;
-            transition: color 0.2s ease-in-out;
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        :root {
+            --surface-0: #09090B; --surface-1: #111117; --surface-2: #18181F; --surface-3: #1E1E28;
+            --border: rgba(255,255,255,0.07); --nu-purple: #8A05BE;
         }
-        .link-id:hover {
-            color: #0a58ca;
-            text-decoration: underline;
-        }
-        
-        /* Efeito para alertar piscando quando o SLA estiver crítico (<12h) */
-        .animate-pulse {
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+        body { background: var(--surface-0); color: #E4E4F0; margin: 0; min-height: 100vh; }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,5,190,0.3); border-radius: 99px; }
+
+        .nu-input { background: var(--surface-3); border: 1px solid var(--border); border-radius: 10px; color: #E4E4F0; padding: 10px 14px; font-size: 14px; transition: all 0.2s; outline: none; width: 100%; }
+        .nu-input:focus { border-color: rgba(138,5,190,0.6); box-shadow: 0 0 0 3px rgba(138,5,190,0.15); }
+        .nu-input::placeholder { color: #52525B; }
+        select.nu-input option { background: #18181F; }
+        .nu-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717A; margin-bottom: 5px; }
+
+        /* Status badges */
+        .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; }
+        .s-aberto      { background: rgba(244,114,182,0.12); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); }
+        .s-atendimento { background: rgba(251,191,36,0.12);  color: #FCD34D; border: 1px solid rgba(252,211,77,0.2); }
+        .s-usuario     { background: rgba(96,165,250,0.12);  color: #60A5FA; border: 1px solid rgba(96,165,250,0.2); }
+        .s-terceiros   { background: rgba(167,139,250,0.12); color: #A78BFA; border: 1px solid rgba(167,139,250,0.2); }
+        .s-resolvido   { background: rgba(52,211,153,0.12);  color: #34D399; border: 1px solid rgba(52,211,153,0.2); }
+        .s-encerrado   { background: rgba(255,255,255,0.06); color: #52525B; border: 1px solid rgba(255,255,255,0.08); }
+
+        /* Priority */
+        .p-alta  { background: rgba(244,114,182,0.12); color: #F472B6; border: 1px solid rgba(244,114,182,0.2); }
+        .p-media { background: rgba(251,191,36,0.12);  color: #FCD34D; border: 1px solid rgba(252,211,77,0.2); }
+        .p-baixa { background: rgba(52,211,153,0.12);  color: #34D399; border: 1px solid rgba(52,211,153,0.2); }
+
+        /* SLA timer colors */
+        .sla-ok      { color: #34D399; font-weight: 700; }
+        .sla-warning { color: #FCD34D; font-weight: 700; }
+        .sla-critical { color: #F472B6; font-weight: 700; animation: pulse-soft 1.5s ease-in-out infinite; }
+        .sla-done    { color: #52525B; font-weight: 600; }
+
+        @keyframes pulse-soft { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Modal overlay */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9998; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .modal-box { background: var(--surface-2); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; max-width: 500px; width: 100%; box-shadow: 0 25px 80px rgba(0,0,0,0.6); }
+
+        /* Table */
+        .nu-table { width: 100%; border-collapse: collapse; }
+        .nu-table thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .nu-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+        .nu-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .nu-table tbody td { padding: 14px 16px; font-size: 13px; color: #D4D4D8; vertical-align: middle; }
+        .nu-table tbody tr:last-child { border-bottom: none; }
+
+        /* Stat card */
+        .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: all 0.25s; }
+        .stat-card:hover { border-color: rgba(138,5,190,0.3); box-shadow: 0 0 24px rgba(138,5,190,0.15); transform: translateY(-1px); }
+
+        .btn-nu { background: linear-gradient(135deg, #8A05BE, #6B03A0); color: white; font-weight: 700; border-radius: 10px; padding: 10px 18px; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3); transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-nu:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(138,5,190,0.45); }
+        .btn-icon { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+
+        @media (max-width: 1023px) { #app-sidebar { transform: translateX(-100%); } #main-content { margin-left: 0 !important; } }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container-fluid px-4">
-            <span class="navbar-brand">SUPORTE TÉCNICO - TICKETS</span>
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-white-50 small me-2 d-none d-md-inline">
-                    Olá, <strong class="text-white">{{ request.user.get_full_name|default:request.user.username }}</strong> 
-                    <span class="badge bg-secondary ms-1">{{ request.user.get_cargo_display }}</span>
+    {% include "partials/sidebar.html" %}
+
+    <div id="main-content" style="margin-left: 256px; min-height: 100vh; padding: 40px 32px; transition: margin 0.3s;">
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 22px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.3px; margin: 0;">Helpdesk & Suporte</h1>
+                <p style="font-size: 13px; color: #71717A; margin: 4px 0 0;">Gerenciamento de chamados técnicos e SLA</p>
+            </div>
+            <a href="{% url 'novo_chamado' %}" class="btn-nu">＋ Novo Chamado</a>
+        </div>
+
+        <!-- KPIs -->
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px;">
+
+            <div class="stat-card">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Total Geral</span>
+                <p style="font-size: 36px; font-weight: 900; color: #FAFAFA; margin: 0; line-height: 1; letter-spacing: -1px;">{{ total }}</p>
+            </div>
+
+            <div class="stat-card" style="border-left: 2px solid rgba(244,114,182,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Em Aberto</span>
+                <p style="font-size: 36px; font-weight: 900; color: #F472B6; margin: 0; line-height: 1; letter-spacing: -1px;">{{ abertos }}</p>
+            </div>
+
+            <div class="stat-card" style="border-left: 2px solid rgba(252,211,77,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Em Andamento</span>
+                <p style="font-size: 36px; font-weight: 900; color: #FCD34D; margin: 0; line-height: 1; letter-spacing: -1px;">{{ andamento }}</p>
+            </div>
+
+            <div class="stat-card" style="border-left: 2px solid rgba(52,211,153,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">Concluídos</span>
+                <p style="font-size: 36px; font-weight: 900; color: #34D399; margin: 0; line-height: 1; letter-spacing: -1px;">{{ finalizados }}</p>
+            </div>
+
+            <div class="stat-card" style="border-left: 2px solid rgba(138,5,190,0.5);">
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; display: block; margin-bottom: 10px;">SLA Médio (Encerrados)</span>
+                <p style="font-size: 30px; font-weight: 900; color: #C084F5; margin: 0; line-height: 1; letter-spacing: -1px;">{{ sla_medio }}</p>
+            </div>
+
+        </div>
+
+        <!-- Tickets Table -->
+        <div style="background: #18181F; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 14px; font-weight: 700; color: #FAFAFA; margin: 0;">Chamados Ativos</h2>
+                <span style="font-size: 11px; color: #52525B;">
+                    Página {{ page_obj.number }} de {{ paginator.num_pages }} &nbsp;·&nbsp; {{ total }} chamado{{ total|pluralize:"s" }} no total
                 </span>
-                
-                <a href="{% url 'novo_chamado' %}" class="btn btn-success btn-sm fw-bold">+ Novo Chamado</a>
-                
-                <form action="{% url 'logout' %}" method="POST" class="d-inline m-0 p-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger btn-sm fw-bold" title="Sair do Sistema">Sair</button>
-                </form>
             </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid px-4">
-
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-dark text-white p-3 rounded text-center">
-                    <h6 class="text-uppercase text-white-50 small mb-2">Total Geral</h6>
-                    <h2 class="text-white mb-0 fw-bold display-6">{{ total }}</h2>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-white p-3 rounded border-top border-danger border-4 text-center">
-                    <h6 class="text-uppercase text-muted small mb-2">Em Aberto</h6>
-                    <h2 class="text-danger mb-0 fw-bold display-6">{{ abertos }}</h2>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-white p-3 rounded border-top border-warning border-4 text-center">
-                    <h6 class="text-uppercase text-muted small mb-2">Em Andamento</h6>
-                    <h2 class="text-warning mb-0 fw-bold display-6">{{ andamento }}</h2>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-white p-3 rounded border-top border-success border-4 text-center">
-                    <h6 class="text-uppercase text-muted small mb-2">Concluídos</h6>
-                    <h2 class="text-success mb-0 fw-bold display-6">{{ finalizados }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm p-4 bg-white rounded border-0">
-            <h2 class="mb-4 fw-bold text-secondary">Gerenciamento de Chamados</h2>
-            
-            <div class="table-responsive">
-                <table class="table table-hover align-middle table-striped-columns">
-                    <thead class="table-dark text-nowrap">
+            <div style="overflow-x: auto;">
+                <table class="nu-table">
+                    <thead>
                         <tr>
-                            <th style="width: 4%;">ID</th>
-                            <th style="width: 11%;">Data Criação</th>
+                            <th style="width: 5%;">ID</th>
+                            <th style="width: 10%;">Data</th>
                             <th style="width: 10%;">Técnico</th>
-                            <th style="width: 12%;">Empresa</th>
-                            <th style="width: 10%;">Solicitante</th>
-                            <th style="width: 8%;">Forma</th>
-                            <th style="width: 9%;">Equipamento</th>
-                            <th style="width: 16%;">Problema apresentado</th>
-                            <th style="width: 10%;" class="text-center">Tempo Restante (SLA)</th>
-                            <th style="width: 5%;" class="text-center">Status</th>
-                            <th style="width: 5%;" class="text-center">Ações</th>
+                            <th style="width: 13%;">Empresa</th>
+                            <th style="width: 9%;">Solicitante</th>
+                            <th style="width: 7%;">Forma</th>
+                            <th style="width: 10%;">Equipamento</th>
+                            <th style="width: 18%;">Problema</th>
+                            <th style="width: 10%; text-align: center;">SLA</th>
+                            <th style="width: 8%; text-align: center;">Status</th>
+                            <th style="width: 8%; text-align: center;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for chamado in chamados %}
+                        {% for chamado in page_obj %}
                         <tr>
                             <td>
-                                <a href="{% url 'detalhe_chamado' chamado.id %}" class="link-id">
-                                    <strong>#{{ chamado.id }}</strong>
+                                <a href="{% url 'detalhe_chamado' chamado.id %}"
+                                   style="font-weight: 800; color: #C084F5; text-decoration: none; font-size: 13px;"
+                                   onmouseover="this.style.color='#E9D5FF'" onmouseout="this.style.color='#C084F5'">
+                                    #{{ chamado.id }}
                                 </a>
                             </td>
-                            <td class="small">{{ chamado.data_hora|date:"d/m/Y H:i:s" }}</td>
-                            
+                            <td style="font-size: 11px; color: #71717A;">{{ chamado.data_hora|date:"d/m/Y" }}<br><span style="color: #3F3F46;">{{ chamado.data_hora|date:"H:i" }}</span></td>
                             <td>
-                                <span class="badge bg-secondary text-wrap">
-                                    {{ chamado.nome_tecnico|default:"Não atribuído" }}
+                                <span style="font-size: 11px; font-weight: 600; color: #A1A1AA; background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px;">
+                                    {{ chamado.nome_tecnico|default:"—" }}
                                 </span>
                             </td>
-                            
                             <td>
-                                <strong>{{ chamado.empresa }}</strong>
+                                <span style="font-weight: 700; color: #FAFAFA; font-size: 13px;">{{ chamado.empresa }}</span>
                                 {% if chamado.prioridade == 'Alta' %}
-                                    <span class="badge bg-danger ms-1 small" style="font-size: 0.65rem;">ALTA</span>
+                                <span class="status-badge p-alta" style="margin-left: 4px; font-size: 9px;">ALTA</span>
                                 {% endif %}
                             </td>
-                            <td>{{ chamado.solicitante }}</td>
+                            <td style="font-size: 12px; color: #A1A1AA;">{{ chamado.solicitante }}</td>
                             <td>
-                                <span class="badge {% if chamado.forma_atendimento|lower == 'remoto' %}bg-info text-dark{% else %}bg-primary{% endif %}">
+                                <span class="status-badge {% if chamado.forma_atendimento|lower == 'remoto' %}s-usuario{% else %}s-terceiros{% endif %}">
                                     {{ chamado.forma_atendimento }}
                                 </span>
                             </td>
-                            <td><span class="small fw-semibold">{{ chamado.equipamento }}</span></td>
+                            <td style="font-size: 12px; color: #A1A1AA; font-weight: 600;">{{ chamado.equipamento }}</td>
                             <td>
-                                <div class="text-truncate text-secondary small" style="max-width: 250px;" title="{{ chamado.problema }}">
-                                    <em>{{ chamado.problema }}</em>
-                                </div>
+                                <p style="font-size: 12px; color: #71717A; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
+                                   title="{{ chamado.problema }}">
+                                    {{ chamado.problema }}
+                                </p>
                                 {% if chamado.ultimo_comentario %}
-                                <div class="small mt-1 text-muted border-top pt-1" style="font-size: 0.78rem;">
-                                    <strong>Último Comentário:</strong> {{ chamado.ultimo_comentario }}
-                                </div>
+                                <p style="font-size: 11px; color: #52525B; margin: 4px 0 0; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.04);">
+                                    <span style="color: #71717A;">↳</span> {{ chamado.ultimo_comentario|truncatechars:50 }}
+                                </p>
                                 {% endif %}
                             </td>
-                            
-                            <td class="text-center text-nowrap">
+
+                            <td style="text-align: center;">
                                 {% if chamado.status == 'Resolvido' or chamado.status == 'Encerrado' %}
-                                    <span class="badge bg-success px-2 py-1.5">Concluído</span>
+                                    {% if chamado.sla %}
+                                        <span class="sla-done" style="font-size: 11px;">✓ {{ chamado.sla }}</span>
+                                    {% else %}
+                                        <span class="sla-done">✓ Concluído</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="fw-bold timer-sla" data-timestamp="{{ chamado.data_hora|date:'U' }}">
-                                        Calculando...
-                                    </span>
+                                    <span class="timer-sla sla-ok" data-timestamp="{{ chamado.data_hora|date:'U' }}">—</span>
                                 {% endif %}
                             </td>
 
-                            <td class="text-center text-nowrap">
+                            <td style="text-align: center;">
                                 {% if chamado.status == 'Aberto' %}
-                                    <span class="status-aberto">Aberto</span>
+                                    <span class="status-badge s-aberto">Aberto</span>
                                 {% elif chamado.status == 'Em Atendimento' %}
-                                    <span class="status-atendimento">Em Atendimento</span>
+                                    <span class="status-badge s-atendimento">Atendendo</span>
                                 {% elif chamado.status == 'Aguardando Usuário' %}
-                                    <span class="status-usuario">Aguardando Usuário</span>
+                                    <span class="status-badge s-usuario">Ag. Usuário</span>
                                 {% elif chamado.status == 'Aguardando Terceiros' %}
-                                    <span class="status-terceiros">Aguardando Terceiros</span>
+                                    <span class="status-badge s-terceiros">Ag. Terceiros</span>
                                 {% elif chamado.status == 'Resolvido' %}
-                                    <span class="status-resolvido">Resolvido</span>
+                                    <span class="status-badge s-resolvido">Resolvido</span>
                                 {% elif chamado.status == 'Encerrado' %}
-                                    <span class="status-encerrado">Encerrado</span>
+                                    <span class="status-badge s-encerrado">Encerrado</span>
                                 {% else %}
-                                    <span class="text-muted">{{ chamado.status }}</span>
+                                    <span class="status-badge" style="color: #71717A;">{{ chamado.status }}</span>
                                 {% endif %}
                             </td>
-                            
-                            <td class="text-center">
-                                <div class="d-flex gap-1 justify-content-center">
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalStatus{{ chamado.id }}" title="Mudar Status">
-                                        ⚙️
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalDeletar{{ chamado.id }}" title="Apagar Chamado">
-                                        🗑️
-                                    </button>
+
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; gap: 6px;">
+                                    <button class="btn-icon" onclick="abrirModalStatus('{{ chamado.id }}')" title="Atualizar status"
+                                            onmouseover="this.style.background='rgba(138,5,190,0.2)'; this.style.borderColor='rgba(138,5,190,0.3)';"
+                                            onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.07)';">⚙️</button>
+                                    <button class="btn-icon" onclick="abrirModalDeletar('{{ chamado.id }}')" title="Excluir chamado"
+                                            onmouseover="this.style.background='rgba(244,114,182,0.1)'; this.style.borderColor='rgba(244,114,182,0.3)';"
+                                            onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.borderColor='rgba(255,255,255,0.07)';">🗑️</button>
                                 </div>
 
-                                <div class="modal fade" id="modalStatus{{ chamado.id }}" tabindex="-1" aria-labelledby="modalLabel{{ chamado.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-dark text-white">
-                                                <h5 class="modal-title" id="modalLabel{{ chamado.id }}">
-                                                    Atualizar Chamado #{{ chamado.id }} - {{ chamado.empresa }}
-                                                </h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <!-- Modal Status -->
+                                <div class="modal-overlay" id="modal-status-{{ chamado.id }}">
+                                    <div class="modal-box">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                                            <div>
+                                                <h3 style="font-size: 15px; font-weight: 800; color: #FAFAFA; margin: 0 0 4px;">Atualizar Chamado #{{ chamado.id }}</h3>
+                                                <p style="font-size: 12px; color: #71717A; margin: 0;">{{ chamado.empresa }} · {{ chamado.solicitante }}</p>
                                             </div>
-                                            <form action="{% url 'atualizar_status' chamado.id %}" method="POST">
-                                                {% csrf_token %}
-                                                <div class="modal-body text-start">
-                                                    <div class="mb-3 p-2 bg-light rounded text-muted small">
-                                                        <strong>Solicitante:</strong> {{ chamado.solicitante }} <br>
-                                                        <strong>Equipamento:</strong> {{ chamado.equipamento }} <br>
-                                                        <strong>Problema:</strong> <em>{{ chamado.problema }}</em>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Novo Status Oficial (POP-001):</label>
-                                                        <select name="status" class="form-select" required>
-                                                            <option value="Aberto" {% if chamado.status == 'Aberto' %}selected{% endif %}>🔴 Aberto</option>
-                                                            <option value="Em Atendimento" {% if chamado.status == 'Em Atendimento' %}selected{% endif %}>🟡 Em Atendimento</option>
-                                                            <option value="Aguardando Usuário" {% if chamado.status == 'Aguardando Usuário' %}selected{% endif %}>🔵 Aguardando Usuário</option>
-                                                            <option value="Aguardando Terceiros" {% if chamado.status == 'Aguardando Terceiros' %}selected{% endif %}>🟣 Aguardando Terceiros</option>
-                                                            <option value="Resolvido" {% if chamado.status == 'Resolvido' %}selected{% endif %}>🟢 Resolvido</option>
-                                                            <option value="Encerrado" {% if chamado.status == 'Encerrado' %}selected{% endif %}>🔒 Encerrado</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Ações Realizadas / Justificativa:</label>
-                                                        <textarea name="comentario" rows="3" class="form-control" placeholder="Digite as ações técnicas aplicadas ou o motivo do aguardo (Obrigatório)..." required></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-success btn-sm">Salvar Alteração</button>
-                                                </div>
-                                            </form>
+                                            <button onclick="fecharModal('modal-status-{{ chamado.id }}')"
+                                                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #71717A; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.15s; flex-shrink: 0;"
+                                                    onmouseover="this.style.color='#E4E4F0'" onmouseout="this.style.color='#71717A'">✕</button>
                                         </div>
+
+                                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 12px; color: #71717A; line-height: 1.5;">
+                                            <strong style="color: #A1A1AA;">Equip.:</strong> {{ chamado.equipamento }} ·
+                                            <strong style="color: #A1A1AA;">Problema:</strong> {{ chamado.problema|truncatechars:100 }}
+                                        </div>
+
+                                        <form action="{% url 'atualizar_status' chamado.id %}" method="POST">
+                                            {% csrf_token %}
+
+                                            <div style="margin-bottom: 16px;">
+                                                <label class="nu-label">Novo Status (POP-001)</label>
+                                                <select name="status" class="nu-input" required>
+                                                    <option value="Aberto" {% if chamado.status == 'Aberto' %}selected{% endif %}>🔴 Aberto</option>
+                                                    <option value="Em Atendimento" {% if chamado.status == 'Em Atendimento' %}selected{% endif %}>🟡 Em Atendimento</option>
+                                                    <option value="Aguardando Usuário" {% if chamado.status == 'Aguardando Usuário' %}selected{% endif %}>🔵 Aguardando Usuário</option>
+                                                    <option value="Aguardando Terceiros" {% if chamado.status == 'Aguardando Terceiros' %}selected{% endif %}>🟣 Aguardando Terceiros</option>
+                                                    <option value="Resolvido" {% if chamado.status == 'Resolvido' %}selected{% endif %}>🟢 Resolvido</option>
+                                                    <option value="Encerrado" {% if chamado.status == 'Encerrado' %}selected{% endif %}>🔒 Encerrado</option>
+                                                </select>
+                                            </div>
+
+                                            <div style="margin-bottom: 20px;">
+                                                <label class="nu-label">Ações Realizadas / Justificativa *</label>
+                                                <textarea name="comentario" rows="3" class="nu-input" required
+                                                          placeholder="Digite as ações técnicas aplicadas ou motivo do aguardo..." style="resize: vertical;"></textarea>
+                                            </div>
+
+                                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                                <button type="button" onclick="fecharModal('modal-status-{{ chamado.id }}')"
+                                                        style="padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); cursor: pointer;">
+                                                    Cancelar
+                                                </button>
+                                                <button type="submit"
+                                                        style="padding: 9px 20px; border-radius: 10px; font-size: 13px; font-weight: 800; color: white; background: linear-gradient(135deg, #8A05BE, #6B03A0); border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(138,5,190,0.3);">
+                                                    Salvar Alteração
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
 
-                                <div class="modal fade" id="modalDeletar{{ chamado.id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title">⚠️ Confirmar Exclusão</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="{% url 'deletar_chamado' chamado.id %}" method="POST">
-                                                {% csrf_token %}
-                                                <div class="modal-body text-start">
-                                                    <p>Tem certeza que deseja apagar permanentemente o chamado <strong>#{{ chamado.id }}</strong>?</p>
-                                                    <p class="small text-muted mb-0"><strong>Solicitante:</strong> {{ chamado.solicitante }}</p>
-                                                    <p class="small text-muted mb-0"><strong>Empresa:</strong> {{ chamado.empresa }}</p>
-                                                    <p class="small text-muted mb-0"><strong>Equipamento:</strong> {{ chamado.equipamento }}</p>
-                                                    <hr>
-                                                    <p class="text-danger small mb-0"><strong>Aviso:</strong> Esta ação não pode ser desfeita. O chamado sumirá do histórico e dos indicadores do Dashboard.</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-danger btn-sm">Sim, Deletar</button>
-                                                </div>
-                                            </form>
+                                <!-- Modal Deletar -->
+                                <div class="modal-overlay" id="modal-del-{{ chamado.id }}">
+                                    <div class="modal-box" style="max-width: 400px;">
+                                        <div style="text-align: center; margin-bottom: 20px;">
+                                            <div style="font-size: 36px; margin-bottom: 12px;">⚠️</div>
+                                            <h3 style="font-size: 16px; font-weight: 800; color: #F472B6; margin: 0 0 6px;">Excluir Chamado #{{ chamado.id }}?</h3>
+                                            <p style="font-size: 12px; color: #71717A; margin: 0;">{{ chamado.empresa }} · {{ chamado.solicitante }}</p>
                                         </div>
+                                        <p style="font-size: 12px; color: #52525B; text-align: center; margin-bottom: 20px;">Esta ação é irreversível e removerá o chamado dos indicadores.</p>
+                                        <form action="{% url 'deletar_chamado' chamado.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <div style="display: flex; gap: 10px;">
+                                                <button type="button" onclick="fecharModal('modal-del-{{ chamado.id }}')"
+                                                        style="flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); cursor: pointer;">
+                                                    Cancelar
+                                                </button>
+                                                <button type="submit"
+                                                        style="flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 800; color: white; background: rgba(244,114,182,0.2); border: 1px solid rgba(244,114,182,0.35); cursor: pointer; color: #F472B6;">
+                                                    Sim, excluir
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
 
@@ -260,74 +302,106 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="11" class="text-center text-muted p-4">Nenhum chamado encontrado no banco de dados.</td>
+                            <td colspan="11" style="padding: 56px; text-align: center;">
+                                <div style="font-size: 36px; margin-bottom: 12px;">🎫</div>
+                                <p style="font-size: 14px; color: #52525B;">Nenhum chamado no sistema.</p>
+                                <a href="{% url 'novo_chamado' %}" class="btn-nu" style="display: inline-flex; margin-top: 16px; text-decoration: none;">+ Criar primeiro chamado</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- ── Paginação ──────────────────────────────────────────── -->
+        {% if paginator.num_pages > 1 %}
+        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;">
+
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}"
+               style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #A1A1AA; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: all 0.15s;"
+               onmouseover="this.style.color='#C084F5'; this.style.borderColor='rgba(138,5,190,0.3)'; this.style.background='rgba(138,5,190,0.08)';"
+               onmouseout="this.style.color='#A1A1AA'; this.style.borderColor='rgba(255,255,255,0.07)'; this.style.background='rgba(255,255,255,0.04)';">← Anterior</a>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; font-size: 12px; font-weight: 800; color: white; background: linear-gradient(135deg, #8A05BE, #6B03A0); border: none; box-shadow: 0 4px 12px rgba(138,5,190,0.35);">{{ num }}</span>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a href="?page={{ num }}"
+                   style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #71717A; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: all 0.15s;"
+                   onmouseover="this.style.color='#C084F5'; this.style.borderColor='rgba(138,5,190,0.3)'; this.style.background='rgba(138,5,190,0.08)';"
+                   onmouseout="this.style.color='#71717A'; this.style.borderColor='rgba(255,255,255,0.07)'; this.style.background='rgba(255,255,255,0.04)';">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+               style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #A1A1AA; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: all 0.15s;"
+               onmouseover="this.style.color='#C084F5'; this.style.borderColor='rgba(138,5,190,0.3)'; this.style.background='rgba(138,5,190,0.08)';"
+               onmouseout="this.style.color='#A1A1AA'; this.style.borderColor='rgba(255,255,255,0.07)'; this.style.background='rgba(255,255,255,0.04)';">Próximo →</a>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-    function atualizarCronometros() {
-        const prazoMaximoMs = 72 * 60 * 60 * 1000; // 72 horas em milissegundos
-        const elementos = document.querySelectorAll('.timer-sla');
-
-        elementos.forEach(el => {
-            const timestampSegundos = el.getAttribute('data-timestamp');
-            if (!timestampSegundos || timestampSegundos.trim() === "" || timestampSegundos.includes('None')) {
-                el.innerHTML = "⚠️ Sem Data";
-                return;
-            }
-
-            try {
-                const dataCriacao = new Date(parseInt(timestampSegundos) * 1000);
-
-                if (isNaN(dataCriacao.getTime())) {
-                    el.innerHTML = "⚠️ Erro Formato";
-                    return;
-                }
-
-                const dataLimite = new Date(dataCriacao.getTime() + prazoMaximoMs);
-                const agora = new Date();
-                const diferenca = dataLimite - agora;
-
-                if (diferenca <= 0) {
-                    el.innerHTML = "⚠️ ESTOURADO";
-                    el.className = "text-danger fw-bold";
-                } else {
-                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
-
-                    let textoTempo = "";
-                    if (dias > 0) {
-                        textoTempo += `${dias}d `;
-                    }
-                    textoTempo += `${String(horas).padStart(2, '0')}h ${String(minutos).padStart(2, '0')}m ${String(segundos).padStart(2, '0')}s`;
-
-                    el.innerHTML = textoTempo;
-
-                    if (diferenca < (12 * 60 * 60 * 1000)) {
-                        el.className = "text-danger fw-bold animate-pulse"; 
-                    } else if (diferenca < (36 * 60 * 60 * 1000)) { 
-                        el.className = "text-warning fw-bold"; 
-                    } else {
-                        el.className = "text-success fw-bold"; 
-                    }
-                }
-            } catch (err) {
-                el.innerHTML = "⚠️ Erro Cálculo";
+        function abrirModalStatus(id) {
+            document.getElementById('modal-status-' + id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function abrirModalDeletar(id) {
+            document.getElementById('modal-del-' + id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function fecharModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        // Close on background click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
+            });
+        });
+        // ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(m => { m.classList.remove('active'); document.body.style.overflow = ''; });
             }
         });
-    }
 
-    atualizarCronometros();
-    setInterval(atualizarCronometros, 1000);
+        // SLA Countdown Timer
+        function atualizarCronometros() {
+            const prazoMaximoMs = 72 * 60 * 60 * 1000;
+            document.querySelectorAll('.timer-sla').forEach(el => {
+                const ts = el.getAttribute('data-timestamp');
+                if (!ts || ts.includes('None')) { el.innerHTML = "⚠ Sem Data"; return; }
+                try {
+                    const dataCriacao = new Date(parseInt(ts) * 1000);
+                    const dataLimite = new Date(dataCriacao.getTime() + prazoMaximoMs);
+                    const diff = dataLimite - new Date();
+                    if (diff <= 0) {
+                        el.innerHTML = "⚠ ESTOURADO"; el.className = 'timer-sla sla-critical'; return;
+                    }
+                    const d = Math.floor(diff / 86400000);
+                    const h = Math.floor((diff % 86400000) / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    el.innerHTML = (d > 0 ? d + 'd ' : '') + String(h).padStart(2,'0') + 'h ' + String(m).padStart(2,'0') + 'm ' + String(s).padStart(2,'0') + 's';
+                    el.className = diff < 43200000 ? 'timer-sla sla-critical' : diff < 129600000 ? 'timer-sla sla-warning' : 'timer-sla sla-ok';
+                } catch(err) { el.innerHTML = "⚠ Erro"; }
+            });
+        }
+        atualizarCronometros();
+        setInterval(atualizarCronometros, 1000);
+
+        function toggleSidebar() {
+            document.getElementById('app-sidebar').classList.toggle('-translate-x-full');
+        }
     </script>
 </body>
 </html>

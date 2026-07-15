@@ -1,6 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Colaborador
+from .models import Colaborador, Aviso
+
+
+@admin.register(Aviso)
+class AvisoAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'tipo', 'data_publicacao', 'ativo')
+    list_filter = ('tipo', 'ativo')
+    search_fields = ('titulo', 'conteudo')
+    list_editable = ('ativo',)
+    ordering = ('-data_publicacao',)
 
 @admin.register(Colaborador)
 class ColaboradorAdmin(UserAdmin):

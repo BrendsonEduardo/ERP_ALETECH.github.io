@@ -15,7 +15,9 @@ urlpatterns = [
     # 2. Módulos do Sistema
     path('helpdesk/', include('helpdesk.urls')), 
     path('comercial/', include('comercial.urls')),
+    path('inventario/', include('inventario.urls', namespace='inventario')),
 ]
+
 
 # Servir arquivos de mídia em ambiente de desenvolvimento (DEBUG = True)
 if settings.DEBUG:
